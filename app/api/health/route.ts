@@ -1,26 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-interface EnvironmentCheckResponse {
-  environment: string;
-  [key: string]: any;
+interface HealthResponse {
+  status: string;
+  timestamp: string;
+  uptime: number;
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const envData: EnvironmentCheckResponse = {
-      environment: process.env.NODE_ENV || 'not set',
-      mandong_test_env: process.env.MANDONG_TEST_ENV || 'not set',
-      mandong_hello: process.env.MANDONG_HELLO || 'not set',
+    const healthData: HealthResponse = {
+      status: 'OK',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
     };
     
-    return NextResponse.json(envData);
+    return NextResponse.json(healthData);
   } catch (error) {
     return NextResponse.json(
       {
-          environment: process.env.NODE_ENV || 'not set',
-          mandong_test_env: process.env.MANDONG_TEST_ENV || 'not set',
-          mandong_hello: process.env.MANDONG_HELLO || 'not set',
-      } as EnvironmentCheckResponse,
+        status: 'ERROR',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+      } as HealthResponse,
       { status: 500 }
     );
   }
