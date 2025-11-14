@@ -15,7 +15,8 @@ export default function TestPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('http://localhost:8000/users');
+        const url = process.env.NEXT_PUBLIC_API_HOST + '/users';
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Failed to fetch users');
         }
