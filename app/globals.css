@@ -1,8 +1,68 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Font faces */
+@font-face {
+  font-family: 'CascadiaCode';
+  src: url('/fonts/CascadiaCode-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'CascadiaCode';
+  src: url('/fonts/CascadiaCode-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'FunnelDisplay';
+  src: url('/fonts/FunnelDisplay-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'RobotoMono';
+  src: url('/fonts/RobotoMono-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'RobotoMono';
+  src: url('/fonts/RobotoMono-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+}
+
+/* Light mode (default) */
+:root,
+html.light {
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --primary: #64748b;
+  --secondary: #475569;
+  --accent: #475569;
+  --muted: #e2e8f0;
+  --border: #cbd5e1;
+  --surface: #ffffff;
+
+  --header-background: #edeff3;
+  --footer-background: #e9ebee;
+  --card-background: #f2f5f7;
+}
+
+/* Dark mode */
+html.dark {
+  --background: #020617;
+  --foreground: #f1f5f9;
+  --primary: #94a3b8;
+  --secondary: #64748b;
+  --accent: #334155;
+  --muted: #1e293b;
+  --border: #0f172a;
+  --surface: #0a0a0a;
+
+  --header-background: #1e293b;
+  --footer-background: #1d2736;
+  --card-background: #0a0e25;
 }
 
 @theme inline {
@@ -12,15 +72,33 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'FunnelDisplay', Arial, Helvetica, sans-serif;
+}
+
+/* Use in other elements */
+.font-code {
+  font-family: 'CascadiaCode', 'RobotoMono', monospace;
+}
+
+.my-header {
+  background-color: var(--header-background);
+}
+
+.my-footer {
+  background-color: var(--footer-background);
+}
+
+.primary-text {
+  color: var(--primary);
+}
+
+.sub-text {
+  color: var(--secondary);
+}
+
+.my-card-bg {
+  background-color: var(--card-background);
 }
