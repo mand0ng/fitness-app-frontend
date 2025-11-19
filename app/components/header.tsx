@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ThemeToggle from "../themes/theme-toggle";
 import Logo from "./logo";
 
@@ -10,8 +11,8 @@ const Header = () => {
                 
                 <div className="flex gap-4 items-center">
                     <div className="flex gap-5 items-center mr-3">
-                        <button>Login</button>
-                        <button>Sign Up</button>
+                        <Link href="/login">Login</Link>
+                        <Link href="/signup">Sign Up</Link>
                     </div>
                     <div className="border h-7"></div>
                     <div>

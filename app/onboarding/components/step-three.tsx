@@ -1,12 +1,35 @@
+"use client";
 import ProgressBar from "./progress-bar";
+import { IUser, User } from "../../models/user";
+import { useEffect, useState } from "react";
+
 
 interface StepThreeProps {
-    visible?: boolean;
     gotoStep?: (step: number) => void;
+    updateUserData?: (field: keyof IUser, value: any) => void;
+    userData?: User;
 }
 
-const StepThree = ({ visible, gotoStep }: StepThreeProps) => {
-    if (!visible) return null;
+const StepThree = ({gotoStep, updateUserData, userData }: StepThreeProps) => {
+    const [enableBtn, setEnableBtn] = useState(false);
+
+    const handleChange = (field: keyof IUser) => (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (updateUserData) {
+            updateUserData(field, e.target.value);
+        }
+    };
+
+    const validateForm = () => {
+        if (userData?.stepThreeCompleted()) {
+            setEnableBtn(true);
+        } else {
+            setEnableBtn(false);
+        }
+    }
+
+    useEffect(() => {
+        validateForm();
+    }, [userData]);
 
     return (
         <div className="border border-(--muted) rounded-lg shadow-lg p-10 my-secondary-bg">
@@ -35,6 +58,8 @@ const StepThree = ({ visible, gotoStep }: StepThreeProps) => {
                             className="w-full border border-(--muted) rounded-md p-2 primary-text"
                             rows={4}
                             placeholder="e.g., knee pain, shoulder injury, back issues, limited mobility..."
+                            value={userData?.notes || ''}
+                            onChange={handleChange('notes')}
                         />
                     </div>
                 </div>
@@ -76,7 +101,7 @@ const StepThree = ({ visible, gotoStep }: StepThreeProps) => {
 
                 <div>
                     {/* Generate My 30-Day Plan */}
-                    <button onClick={() => gotoStep && gotoStep(4)} className="mt-8 w-full bg-blue-500 text-white py-3 rounded-md hover:bg-blue-600 transition-colors">
+                    <button disabled={!enableBtn} onClick={() => gotoStep && gotoStep(4)} className={`mt-8 w-full ${enableBtn ? "bg-blue-500 hover:bg-blue-600" : "bg-blue-300"} text-white py-3 rounded-md  transition-colors`}>
                         Generate My 30-Day Plan
                     </button>
                 </div>
