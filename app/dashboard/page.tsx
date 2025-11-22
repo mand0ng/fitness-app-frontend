@@ -4,129 +4,153 @@ import Footer from "../components/footer";
 import MyCalendar from "./components/my-calendar";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getUserContext } from "@/context/user-context";
+import { isUserDoneOnboarding } from "@/utils/utils";
+import { workoutService } from "@/services/workout-service";
+import { WorkoutProgram } from "@/types/workout";
 
-class User {
-    email: string
-    name: string
-    age: number
-    height: number
-    weight: number
-    fitness_level: string
-    fitness_goal: string
-    work_out_location: string
-    days_availability: string[]
-    equipment_availability: string[]
-    notes: string
-    
-    constructor(
-        email: string, 
-        name: string, 
-        age: number, 
-        height: number, 
-        weight: number, 
-        fitness_level: string, 
-        fitness_goal: string, 
-        work_out_location: string, 
-        days_availability: string[], 
-        equipment_availability: string[], 
-        notes: string) {
-
-        this.email = email;
-        this.name = name;
-        this.age = age;
-        this.height = height;
-        this.weight = weight;
-        this.fitness_level = fitness_level;
-        this.fitness_goal = fitness_goal;
-        this.work_out_location = work_out_location;
-        this.days_availability = days_availability;
-        this.equipment_availability = equipment_availability;
-        this.notes = notes;
-    }
-}
-
-const Dashboard = () =>{
-    const [token, setToken] = useState<string | null>(null);
-    const [userData, setUserData] = useState<User | null>(null);
+const Dashboard = () => {
     const router = useRouter();
+    const { user, removeToken, isFetchingUser, userIsLoggedIn, getToken } = getUserContext();
     const [loading, setLoading] = useState(true);
-    const [localVarsSet, setLocalVarsSet] = useState(false);
+    const [workoutData, setWorkoutData] = useState<WorkoutProgram | null>(null);
+    const [generatingWorkout, setGeneratingWorkout] = useState(false);
+    const [generationProgress, setGenerationProgress] = useState<string>('');
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        console.log("Dashboard mounted, getting token from localStorage");
-        setToken(localStorage.getItem("token"));
-        setLocalVarsSet(true);
-    }, []);
+        console.log("Dashboard:: user", user);
 
+        if (isFetchingUser) return;
 
-    const checkToken = async () => {
-
-        if (!localVarsSet) return;
-        
-        if (!token) {
-            console.log("Dashboard: no token, go to login");
+        if (!user || !userIsLoggedIn) {
+            removeToken();
             router.push("/login");
             return;
         }
 
-        try {
-            const response = await fetch('http://localhost:8000/check-token/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
-                
-                if (data.status === "success") {
-                    
-                    if (data.onboarding == "complete") {
-                        // router.push("/dashboard");
+        if (user && !isUserDoneOnboarding(user)) {
+            router.push("/onboarding");
+            return;
+        }
 
-                        const user = new User(
-                            data.user.email,
-                            data.user.name,
-                            data.user.age,
-                            data.user.height,
-                            data.user.weight,
-                            data.user.fitness_level,
-                            data.user.fitness_goal,
-                            data.user.work_out_location,
-                            data.user.days_availability,
-                            data.user.equipment_availability,
-                            data.user.notes
-                        );
-                        setUserData(user);
-                        setLoading(false);
-                    } else {
-                        router.push("/onboarding");
-                        console.log("dashboard")
-                    }
-                }
+        // Fetch workout data
+        fetchWorkoutData();
+    }, [user, router, isFetchingUser, userIsLoggedIn]);
+
+    const fetchWorkoutData = async () => {
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await workoutService.getUserWorkout(token);
+
+            if (response.status === 'success' && response.workout) {
+                setWorkoutData(response.workout);
+                setLoading(false);
             } else {
-                console.error("Token is invalid:", data);
-                localStorage.removeItem("token");
-                setToken(null);
-                router.push("/login");
+                // No workout found, trigger generation
+                await handleWorkoutGeneration();
             }
-      } catch (error) {
-        console.error("Error checking token:", error);
-      }
-        
+        } catch (err) {
+            console.error('Error fetching workout:', err);
+            // Try to generate workout if fetch fails
+            await handleWorkoutGeneration();
+        }
     };
 
-    useEffect(() => {
-        checkToken();
-    }, [token, localVarsSet]);
+    const handleWorkoutGeneration = async () => {
+        const token = getToken();
+        if (!token) return;
 
-    if (loading) {
+        try {
+            setGeneratingWorkout(true);
+            setGenerationProgress('Starting workout generation...');
+
+            const createResponse = await workoutService.createUserWorkout(token);
+
+            if (createResponse.status === 'error') {
+                setError(createResponse.message || 'Failed to create workout');
+                setGeneratingWorkout(false);
+                setLoading(false);
+                return;
+            }
+
+            if (!createResponse.job_id) {
+                setError('No job ID returned');
+                setGeneratingWorkout(false);
+                setLoading(false);
+                return;
+            }
+
+            // Poll job status
+            setGenerationProgress('Generating your personalized workout plan... This may take 3-5 minutes.');
+
+            const jobResult = await workoutService.pollJobStatus(
+                token,
+                createResponse.job_id,
+                (status) => {
+                    if (status.status === 'processing') {
+                        setGenerationProgress('Still generating... Please wait.');
+                    }
+                }
+            );
+
+            if (jobResult.status === 'failed') {
+                setError(jobResult.error || 'Workout generation failed');
+                setGeneratingWorkout(false);
+                setLoading(false);
+                return;
+            }
+
+            // Fetch the completed workout
+            setGenerationProgress('Workout generated! Loading your plan...');
+            await fetchWorkoutData();
+            setGeneratingWorkout(false);
+        } catch (err) {
+            console.error('Error generating workout:', err);
+            setError('Failed to generate workout. Please try again.');
+            setGeneratingWorkout(false);
+            setLoading(false);
+        }
+    };
+
+    if (loading || generatingWorkout) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-background">
-                <p className="sub-text text-xl">Loading...</p>
+            <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="sub-text text-xl mb-2">
+                        {generatingWorkout ? 'Generating Workout...' : 'Loading...'}
+                    </p>
+                    {generationProgress && (
+                        <p className="text-sm text-muted-foreground max-w-md">
+                            {generationProgress}
+                        </p>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+                <div className="text-center max-w-md">
+                    <p className="text-xl text-red-500 mb-4">{error}</p>
+                    <button
+                        onClick={() => {
+                            setError(null);
+                            fetchWorkoutData();
+                        }}
+                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                    >
+                        Try Again
+                    </button>
+                </div>
             </div>
         );
     }
@@ -134,12 +158,12 @@ const Dashboard = () =>{
     return (
         <section>
             <Header />
-                <section className="m-20">
-                    <div className="border border-(--muted) rounded-lg shadow-lg p-10 my-secondary-bg mb-10">
-                        <h1 className="text-2xl font-bold mb-2">Welcome back Jane Doe!</h1>
-                    </div>
-                    <MyCalendar />
-                </section>
+            <section className="m-20">
+                <div className="border border-(--muted) rounded-lg shadow-lg p-10 my-secondary-bg mb-10">
+                    <h1 className="text-2xl font-bold mb-2">Welcome back {user?.name || 'Jane Doe'}!</h1>
+                </div>
+                <MyCalendar workoutData={workoutData} />
+            </section>
             <Footer />
         </section>
     );

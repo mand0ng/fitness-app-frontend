@@ -2,69 +2,58 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { authService } from "@/services/auth-service";
+import { getUserContext } from "@/context/user-context";
+import { isUserDoneOnboarding } from "@/utils/utils";
+import Loading from "../components/loading";
 
 const SignupPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
-    const [error, setError] = useState(""); 
+    const [error, setError] = useState("");
     const router = useRouter();
     const [success, setSuccess] = useState(false);
     const [dotCount, setDotCount] = useState(3);
+    const { signup, user, userIsLoggedIn, isFetchingUser } = getUserContext();
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (isFetchingUser) return;
+
+
+        if (!user && !userIsLoggedIn) {
+            router.push("/login")
+        } else {
+            setLoading(false);
+        }
+
+        if (user && !isUserDoneOnboarding(user)) {
+            router.push("/onboarding")
+        }
+
+        if (user && isUserDoneOnboarding(user)) {
+            router.push("/dashboard")
+        }
+
+    }, [router, user, isFetchingUser]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const createUserApi = process.env.NEXT_PUBLIC_CREATE_USER_API;
-        if (!createUserApi) {
-            console.error("CREATE_USER_API is not defined");
-            return;
-        }
         try {
-            const response = await fetch(createUserApi, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    name,
-                    password,
-                }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                if (errorData.status === "error" && errorData.message) {
-                    setError(errorData.message);
-                } else {
-                    setError(errorData.detail || "Unknown error");
-                }
-                return;
-            }
-
-            // Handle success response
-            const data = await response.json();
-            // Optionally, redirect or clear form here
-            setEmail("");
-            setPassword("");
-            setName("");
-            setError("");
-            
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-            }
-
-            localStorage.setItem("fromSignup", "true");
-
+            await signup({ email, name, password });
             setSuccess(true);
-
             setTimeout(() => {
                 router.push('/login');
             }, 2000);
-
-        } catch (error) {
-            console.error("Network error:", error);
+        } catch (error: any) {
+            console.error(error);
+            setError(error.message);
+            setTimeout(() => {
+                setError("");
+            }, 3000);
         }
+
     };
 
     useEffect(() => {
@@ -75,20 +64,27 @@ const SignupPage = () => {
             return () => clearInterval(interval);
         }
     }, [success]);
-    
+
+
+    if (loading) {
+        return (
+            <Loading />
+        );
+    }
+
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-background">
 
             {success && (
-                <div className="fixed inset bg-opacity-50 flex items-center justify-center z-50 w-full bg-gray-400/50 h-full">
-                    <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-                        <h2 className="text-2xl font-bold mb-2 ">Signup Successful!</h2>
+                <div className="fixed inset-0 flex items-center justify-center z-50 w-full h-full bg-background/90">
+                    <div className="my-card-bg border border-(--muted) p-8 rounded-lg shadow-lg text-center">
+                        <h2 className="text-2xl font-bold mb-2">{`Signup Successful${" " + user?.name || ""}!`}</h2>
                         <p className="mb-4 sub-text w-full">{`Redirecting to login${'.'.repeat(dotCount)}`}</p>
                     </div>
                 </div>
             )}
-            
+
             <form
                 onSubmit={handleSubmit}
                 className="bg-(--card-background) p-8 rounded-lg shadow-lg w-full max-w-sm flex flex-col gap-4"

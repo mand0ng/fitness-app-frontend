@@ -1,5 +1,7 @@
+"use client";
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 interface LogoProps {
     size?: number;
@@ -7,9 +9,12 @@ interface LogoProps {
 }
 
 const Logo = ({ size = 48, textSize = "text-2xl" }: LogoProps) => {
-    const { theme } = useTheme();
-    
-    const logoSrc = theme === "white" ? "/logo/white.png" : "/logo/black.png";
+    const { resolvedTheme } = useTheme();
+    const [logoSrc, setLogoSrc] = useState("/logo/white-header.png");
+
+    useEffect(() => {
+        setLogoSrc(resolvedTheme == "dark" ? "/logo/white-header.png" : "/logo/black-header.png");
+    }, [resolvedTheme]);
 
     return (
         <div className="flex items-center">

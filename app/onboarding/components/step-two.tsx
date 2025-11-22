@@ -2,62 +2,80 @@
 
 import { useEffect, useState } from "react";
 import ProgressBar from "./progress-bar";
-import { User, IUser } from "../../models/user";
+import { IUser } from '@/context/user-context';
+import { isUserStepTwoCompleted } from '@/utils/utils';
 
 interface StepTwoProps {
-    gotoStep?: (step: number) => void;
-    updateUserData?: (field: keyof User, value: any) => void;
-    userData?: User;
+    gotoStep: (step: number) => void;
+    updateUserDetails: (field: keyof IUser, value: any) => void;
+    userDetails: IUser | null;
 }
 
-const StepTwo = ({gotoStep, updateUserData, userData }: StepTwoProps) => {
+const StepTwo = ({ gotoStep, updateUserDetails, userDetails }: StepTwoProps) => {
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const equipmentOptions = [
         { label: "Bodyweight", value: "bodyweight" },
-        { label: "Dumbbells", value: "dumbbells" },
-        { label: "Resistance Bands", value: "resistance_bands" },
-        { label: "Kettlebells", value: "kettlebells" },
-        { label: "Pull-up Bar", value: "pull_up_bar" },
-        { label: "Yoga Mat", value: "yoga_mat" },
-        { label: "Full Gym Access", value: "full_gym_access" }
+        { label: "Dumbbells", value: "dumbells" },
+        { label: "Resistance Bands", value: "resistance bands" },
+        { label: "Kettlebells", value: "kettleballs" },
+        { label: "Pull-up Bar", value: "pull-up bars" },
+        { label: "Yoga Mat", value: "yoga mat" },
+        { label: "Full Gym Access", value: "full gym access" }
     ];
     const [enableBtn, setEnableBtn] = useState(false);
+    const [review, setReview] = useState(false);
+    const [errors, setErrors] = useState<{ daysAvailability?: string; equipmentAvailability?: string }>({});
 
     const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (updateUserData) {
-            updateUserData('work_out_location', e.target.value);
+        const value = e.target.value;
+        // Validate workout location
+        const validLocations = ['home workout', 'gym workout', 'both home and gym'];
+        if (validLocations.includes(value)) {
+            updateUserDetails('workoutLocation', value);
         }
     };
 
     const handleAvailabilityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (updateUserData) {
-            const value = e.target.value;
-            let updatedDays = userData?.days_availability || [];
-            if (e.target.checked) {
-                updatedDays = [...updatedDays, value];
-            } else {
-                updatedDays = updatedDays.filter(day => day !== value);
-            }
-            updateUserData('days_availability', updatedDays);
+        const value = e.target.value;
+        let updatedDays = userDetails?.daysAvailability || [];
+        if (e.target.checked) {
+            updatedDays = [...updatedDays, value];
+        } else {
+            updatedDays = updatedDays.filter(day => day !== value);
         }
-    };
+
+        // Validate: must have at least 3 days
+        if (updatedDays.length < 3 && updatedDays.length > 0) {
+            setErrors(prev => ({ ...prev, daysAvailability: 'Please select at least 3 days' }));
+        } else {
+            setErrors(prev => ({ ...prev, daysAvailability: undefined }));
+        }
+
+        updateUserDetails('daysAvailability', updatedDays);
+    }
 
     const handleEquipmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (updateUserData) {
-            const value = e.target.value;
-            let updatedEquipment = userData?.equipment_availability || [];
-            if (e.target.checked) {
-                updatedEquipment = [...updatedEquipment, value];
-            } else {
-                updatedEquipment = updatedEquipment.filter
-                    (equipment => equipment !== value);
-            }
-            updateUserData('equipment_availability', updatedEquipment);
+        const value = e.target.value;
+        let updatedEquipment = userDetails?.equipmentAvailability || [];
+        if (e.target.checked) {
+            updatedEquipment = [...updatedEquipment, value];
+        } else {
+            updatedEquipment = updatedEquipment.filter
+                (equipment => equipment !== value);
         }
+
+        // Validate: must have at least 1 equipment
+        if (updatedEquipment.length === 0) {
+            setErrors(prev => ({ ...prev, equipmentAvailability: 'Please select at least one equipment option' }));
+        } else {
+            setErrors(prev => ({ ...prev, equipmentAvailability: undefined }));
+        }
+
+        updateUserDetails('equipmentAvailability', updatedEquipment);
     };
 
     const validateForm = () => {
-        if (userData?.stepTwoCompleted()) {
+        if (isUserStepTwoCompleted(userDetails)) {
             setEnableBtn(true);
         } else {
             setEnableBtn(false);
@@ -66,7 +84,7 @@ const StepTwo = ({gotoStep, updateUserData, userData }: StepTwoProps) => {
 
     useEffect(() => {
         validateForm();
-    }, [userData]);
+    }, [userDetails]);
 
 
     return (
@@ -93,18 +111,18 @@ const StepTwo = ({gotoStep, updateUserData, userData }: StepTwoProps) => {
                     <div className="mt-2">
                         <p className="sub-text mt-2">
                             Where do you prefer to exercise?
-                        </p>  
+                        </p>
                         <div className="mt-2 flex flex-col md:flex-row gap-4 justify-center">
                             <label className="flex items-center gap-2">
-                                <input type="radio" name="workout-location" value="home_workout" checked={userData?.work_out_location === 'home_workout'} onChange={handleLocationChange} />
+                                <input type="radio" name="workout-location" value="home workout" checked={userDetails?.workoutLocation === 'home workout'} onChange={handleLocationChange} />
                                 Home Workouts
                             </label>
                             <label className="flex items-center gap-2">
-                                <input type="radio" name="workout-location" value="gym_workout" checked={userData?.work_out_location === 'gym_workout'} onChange={handleLocationChange} />
+                                <input type="radio" name="workout-location" value="gym workout" checked={userDetails?.workoutLocation === 'gym workout'} onChange={handleLocationChange} />
                                 Gym Workouts
                             </label>
                             <label className="flex items-center gap-2">
-                                <input type="radio" name="workout-location" value="both" checked={userData?.work_out_location === 'both'} onChange={handleLocationChange} />
+                                <input type="radio" name="workout-location" value="both home and gym" checked={userDetails?.workoutLocation === 'both home and gym'} onChange={handleLocationChange} />
                                 Both Home and Gym
                             </label>
                         </div>
@@ -114,9 +132,9 @@ const StepTwo = ({gotoStep, updateUserData, userData }: StepTwoProps) => {
                 <div className="mt-8">
                     <h1 className="text-lg font-bold">Days & Time Availability</h1>
                     <div className="mt-2">
-                        
+
                         <p className="sub-text mt-2">
-                            When can you commit to workout? <br/>
+                            When can you commit to workout? <br />
                             <span className="sub-text text-xs italic">(Select at least 3 days)</span>
                         </p>
 
@@ -127,13 +145,14 @@ const StepTwo = ({gotoStep, updateUserData, userData }: StepTwoProps) => {
                                         type="checkbox"
                                         name="availability"
                                         value={day.toLowerCase()}
-                                        checked={userData?.days_availability.includes(day.toLowerCase())}
+                                        checked={userDetails?.daysAvailability?.includes(day.toLowerCase()) ?? false}
                                         onChange={handleAvailabilityChange}
                                     />
                                     {day}s
                                 </label>
                             ))}
                         </div>
+                        {errors.daysAvailability && <p className="text-red-500 text-xs mt-2">{errors.daysAvailability}</p>}
 
                     </div>
                 </div>
@@ -143,11 +162,11 @@ const StepTwo = ({gotoStep, updateUserData, userData }: StepTwoProps) => {
                 <div className="mt-8">
                     <h1 className="text-lg font-bold">Available Equipment</h1>
                     <div className="mt-2">
-                        
+
                         <p className="sub-text mt-2">
                             What equipment do you have access to?
                         </p>
-                        
+
                         <div className="mt-2 grid grid-cols-3 gap-3 justify-center">
                             {equipmentOptions.map(option => (
                                 <label key={option.value} className="flex items-center gap-2">
@@ -155,14 +174,15 @@ const StepTwo = ({gotoStep, updateUserData, userData }: StepTwoProps) => {
                                         type="checkbox"
                                         name="equipment"
                                         value={option.value}
-                                        checked={userData?.equipment_availability.includes(option.value)}
+                                        checked={userDetails?.equipmentAvailability?.includes(option.value) ?? false}
                                         onChange={handleEquipmentChange}
                                     />
                                     {option.label}
                                 </label>
                             ))}
-                            
+
                         </div>
+                        {errors.equipmentAvailability && <p className="text-red-500 text-xs mt-2">{errors.equipmentAvailability}</p>}
                     </div>
                 </div>
 

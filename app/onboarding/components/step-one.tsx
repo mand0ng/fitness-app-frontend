@@ -1,36 +1,101 @@
 "use client";
 import { useEffect, useState } from 'react';
 import ProgressBar from './progress-bar';
-import { User, IUser } from '../../models/user';
+import { IUser } from '@/context/user-context';
+import { isUserStepOneCompleted } from '@/utils/utils';
 
 interface StepOneProps {
-    gotoStep?: (step: number) => void;
-    updateUserData?: (field: keyof IUser, value: any) => void;
-    userData?: User;
+    gotoStep: (step: number) => void;
+    updateUserDetails: (field: keyof IUser, value: any) => void;
+    userDetails: IUser | null;
 }
 
-const StepOne = ({gotoStep, updateUserData, userData }: StepOneProps) => {
-
+const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => {
     const [enableBtn, setEnableBtn] = useState(false);
-    
-    const validateForm = () => {
-        if (userData?.stepOneCompleted()) {
+    const [errors, setErrors] = useState<Partial<Record<keyof IUser, string>>>({});
+    const [age, setAge] = useState('');
+    const [weight, setWeight] = useState('');
+    const [height, setHeight] = useState('');
+    const [gender, setGender] = useState('');
+    const [fitnessLevel, setFitnessLevel] = useState('');
+    const [fitnessGoal, setFitnessGoal] = useState('');
+
+    const enableNextStepButton = () => {
+        if (isUserStepOneCompleted(userDetails || null)) {
             setEnableBtn(true);
         } else {
             setEnableBtn(false);
         }
     };
 
+    const validateField = (field: keyof IUser, value: any): string | null => {
+        switch (field) {
+            case 'age':
+                const age = Number(value);
+                if (!value || value === '') return null; // Allow empty for user to type
+                if (isNaN(age)) return 'Age must be a number';
+                if (age < 16) return 'Age must be at least 16';
+                if (age > 80) return 'Age must be 80 or less';
+                return null;
+
+            case 'weight':
+                const weight = Number(value);
+                if (!value || value === '') return null;
+                if (isNaN(weight)) return 'Weight must be a number';
+                if (weight < 40) return 'Weight must be at least 40kg';
+                if (weight > 200) return 'Weight must be 200kg or less';
+                return null;
+
+            case 'height':
+                const height = Number(value);
+                if (!value || value === '') return null;
+                if (isNaN(height)) return 'Height must be a number';
+                if (height < 100) return 'Height must be at least 100cm';
+                if (height > 250) return 'Height must be 250cm or less';
+                return null;
+
+            case 'gender':
+                if (!value || value === '') return null;
+                if (!['male', 'female'].includes(value)) return 'Please select a valid gender';
+                return null;
+
+            case 'fitnessLevel':
+                if (!value || value === '') return null;
+                if (!['beginner', 'intermediate', 'advance'].includes(value)) return 'Please select a valid fitness level';
+                return null;
+
+            case 'fitnessGoal':
+                if (!value || value === '') return null;
+                const validGoals = ['lose weight', 'build muscle', 'improve endurance', 'general fitness'];
+                if (!validGoals.includes(value)) return 'Please select a valid fitness goal';
+                return null;
+
+            default:
+                return null;
+        }
+    };
+
     const handleChange = (field: keyof IUser) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        if (updateUserData) {
-            updateUserData(field, e.target.value);
-            console.log(e.target.value);
+        const value = e.target.value;
+
+        // Validate the field
+        const error = validateField(field, value);
+
+        // Update errors state
+        setErrors(prev => ({
+            ...prev,
+            [field]: error || undefined
+        }));
+
+        // Only update user details if there's no error and value is not empty
+        if (!error && value !== '') {
+            updateUserDetails(field, value);
         }
     };
 
     useEffect(() => {
-        validateForm();
-    }, [userData]);
+        enableNextStepButton();
+    }, [userDetails]);
 
     return (
         <div className="border border-(--muted) rounded-lg shadow-lg p-10 my-secondary-bg">
@@ -51,11 +116,29 @@ const StepOne = ({gotoStep, updateUserData, userData }: StepOneProps) => {
                         <input
                             type="number"
                             id="age"
-                            className="w-full border border-(--muted) rounded-md p-2 primary-text"
+                            className={`w-full border ${errors.age ? 'border-red-500' : 'border-(--muted)'} rounded-md p-2 primary-text`}
                             placeholder="Enter your age"
-                            value={userData?.age || ''}
+                            value={userDetails?.age || ''}
                             onChange={handleChange('age')}
                         />
+                        {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
+                    </div>
+
+                    {/* gender */}
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium mb-1" htmlFor="gender">
+                            Birth Gender
+                        </label>
+                        <select
+                            id="gender"
+                            className="w-full border border-(--muted) rounded-md p-2 primary-text"
+                            value={userDetails?.gender || ''}
+                            onChange={handleChange('gender')}
+                        >
+                            <option value="">-- Select birth gender --</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
                     </div>
 
                     {/* weight */}
@@ -66,26 +149,29 @@ const StepOne = ({gotoStep, updateUserData, userData }: StepOneProps) => {
                         <input
                             type="number"
                             id="weight"
-                            className="w-full border border-(--muted) rounded-md p-2 primary-text"
+                            className={`w-full border ${errors.weight ? 'border-red-500' : 'border-(--muted)'} rounded-md p-2 primary-text`}
                             placeholder="Enter your weight"
-                            value={userData?.weight || ''}
+                            value={userDetails?.weight || ''}
                             onChange={handleChange('weight')}
+
                         />
+                        {errors.weight && <p className="text-red-500 text-xs mt-1">{errors.weight}</p>}
                     </div>
 
                     {/* height */}
                     <div className="mb-4">
                         <label className="block text-sm font-medium mb-1" htmlFor="height">
                             Height (cm)
-                            </label>
+                        </label>
                         <input
                             type="number"
                             id="height"
-                            className="w-full border border-(--muted) rounded-md p-2 primary-text"
+                            className={`w-full border ${errors.height ? 'border-red-500' : 'border-(--muted)'} rounded-md p-2 primary-text`}
                             placeholder="Enter your height"
-                            value={userData?.height || ''}
+                            value={userDetails?.height || ''}
                             onChange={handleChange('height')}
                         />
+                        {errors.height && <p className="text-red-500 text-xs mt-1">{errors.height}</p>}
                     </div>
                 </div>
 
@@ -101,8 +187,8 @@ const StepOne = ({gotoStep, updateUserData, userData }: StepOneProps) => {
                         <select
                             id="fitness-level"
                             className="w-full border border-(--muted) rounded-md p-2 primary-text"
-                            value={userData?.fitness_level || ''}
-                            onChange={handleChange('fitness_level')}
+                            value={userDetails?.fitnessLevel || ''}
+                            onChange={handleChange('fitnessLevel')}
                         >
                             <option value="">-- Select a level --</option>
                             <option value="beginner">Beginner</option>
@@ -118,14 +204,14 @@ const StepOne = ({gotoStep, updateUserData, userData }: StepOneProps) => {
                         <select
                             id="goals"
                             className="w-full border border-(--muted) rounded-md p-2 primary-text"
-                            value={userData?.fitness_goal || ''}
-                            onChange={handleChange('fitness_goal')}
+                            value={userDetails?.fitnessGoal || ''}
+                            onChange={handleChange('fitnessGoal')}
                         >
                             <option value="">-- Select a goal --</option>
-                            <option value="lose_weight">Lose Weight</option>
-                            <option value="build_muscle">Build Muscle</option>
-                            <option value="improve_endurance">Improve Endurance</option>
-                            <option value="general_fitness">General Fitness</option>
+                            <option value="lose weight">Lose Weight</option>
+                            <option value="build muscle">Build Muscle</option>
+                            <option value="improve endurance">Improve Endurance</option>
+                            <option value="general fitness">General Fitness</option>
                         </select>
                     </div>
                 </div>

@@ -2,88 +2,56 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { authService } from "@/services/auth-service";
+import { getUserContext } from "@/context/user-context";
+import { isUserDoneOnboarding } from "@/utils/utils";
+import Loading from "../components/loading";
 
 const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const router = useRouter();
-    const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const [fromSignup, setFromSignup] = useState<boolean | null>(null);
-    const [localVarsSet, setLocalVarsSet] = useState(false);
+    const { login, user, isFetchingUser, removeToken } = getUserContext();
 
     useEffect(() => {
-        setToken(localStorage.getItem("token"));
-        setFromSignup(localStorage.getItem("fromSignup") === "true");
-        setLocalVarsSet(true);
+        // 1. Wait for UserContext to finish checking session
+        console.log("login:: isFetchingUser, ", isFetchingUser);
+        console.log("mandong")
+        if (isFetchingUser) return;
 
-        console.log("LOGIN PAGE:: token=" + localStorage.getItem("token"));
-        console.log("LOGIN PAGE:: fromSignup=" + localStorage.getItem("fromSignup"));
-    }, []);
-
-    // for users that are already logged in
-    useEffect(() => {
-    // Check if user is coming from signup
-        console.info("LOGIN PAGE:: fromSignup and token checking");
-
-        if (!localVarsSet) return;
-
-        console.info("LOGIN PAGE:: localVarsSet is true, proceeding with redirect logic");
-        if (fromSignup && token) {
-            console.log("LOGIN PAGE:: redirecting to onboarding");
-            setFromSignup(true);
-            setLoading(true);
-            localStorage.removeItem("fromSignup");
-            setTimeout(() => {
+        if (user) {
+            // 2. User is logged in
+            if (isUserDoneOnboarding(user)) {
+                router.push("/dashboard");
+            } else {
                 router.push("/onboarding");
-            }, 1500);
-        } else if (token) {
-            console.log("LOGIN PAGE:: user is logged in, redirecting to dashboard");
-            setLoading(true);
-            router.push("/dashboard");
+            }
         } else {
+            // 3. User is NOT logged in -> Show Login Form
             setLoading(false);
-            console.log("LOGIN PAGE:: no redirect");
+            removeToken();
         }
-    }, [fromSignup, token, router, localVarsSet]);
+    }, [user, isFetchingUser, router]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setError("");
-        const loginApi = process.env.NEXT_PUBLIC_LOGIN_API;
-        if (!loginApi) {
-            console.error("LOGIN_API is not defined");
-            return;
-        }
         try {
-            const response = await fetch(loginApi, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || data.status !== "success" || !data.access_token) {
-                setError(data.detail || "Login failed");
-                return;
-            }
-
-            localStorage.setItem("token", data.access_token);
+            await login({ email, password });
             router.push("/dashboard");
-        } catch (err) {
-            setError("Network error. Please try again.");
+        } catch (error: any) {
+            console.error(error);
+            setError(error.message);
+            setTimeout(() => {
+                setError("");
+            }, 3000);
         }
     };
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-background">
-                <p className="sub-text text-xl">Loading...</p>
-            </div>
+            <Loading />
         );
     }
 
