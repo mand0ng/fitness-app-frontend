@@ -15,28 +15,26 @@ const SignupPage = () => {
     const router = useRouter();
     const [success, setSuccess] = useState(false);
     const [dotCount, setDotCount] = useState(3);
-    const { signup, user, userIsLoggedIn, isFetchingUser } = getUserContext();
+    const { signup, user, userIsLoggedIn, isFetchingUser, removeToken } = getUserContext();
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // 1. Wait for UserContext to finish checking session
         if (isFetchingUser) return;
 
-
-        if (!user && !userIsLoggedIn) {
-            router.push("/login")
+        if (user) {
+            // 2. User is logged in
+            if (isUserDoneOnboarding(user)) {
+                router.push("/dashboard");
+            } else {
+                router.push("/onboarding");
+            }
         } else {
+            // 3. User is NOT logged in -> Show Signup Form
             setLoading(false);
+            removeToken();
         }
-
-        if (user && !isUserDoneOnboarding(user)) {
-            router.push("/onboarding")
-        }
-
-        if (user && isUserDoneOnboarding(user)) {
-            router.push("/dashboard")
-        }
-
-    }, [router, user, isFetchingUser]);
+    }, [user, isFetchingUser, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -44,7 +42,8 @@ const SignupPage = () => {
             await signup({ email, name, password });
             setSuccess(true);
             setTimeout(() => {
-                router.push('/login');
+                router.push('/onboarding');
+                // router.push('/login');
             }, 2000);
         } catch (error: any) {
             console.error(error);
@@ -53,7 +52,6 @@ const SignupPage = () => {
                 setError("");
             }, 3000);
         }
-
     };
 
     useEffect(() => {

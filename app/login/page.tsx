@@ -17,8 +17,6 @@ const LoginPage = () => {
 
     useEffect(() => {
         // 1. Wait for UserContext to finish checking session
-        console.log("login:: isFetchingUser, ", isFetchingUser);
-        console.log("mandong")
         if (isFetchingUser) return;
 
         if (user) {

@@ -15,7 +15,7 @@ const OnboardingPage = () => {
     const [localVarsSet, setLocalVarsSet] = useState(false);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
-    const { user, isFetchingUser, updateUserDetails } = getUserContext();
+    const { user, isFetchingUser, updateUserDetails, saveUserDetails } = getUserContext();
 
     const gotoStep = (step: number) => {
         setCurrentStep(step);
@@ -26,6 +26,7 @@ const OnboardingPage = () => {
         // step 5 finish
 
         // if 1, 2 ,3 steps are done, go to /dashboard
+        console.log("ONBOARDING:: step: ", step)
         if (step === 5) {
             setGenerating(true);
             router.push("/dashboard");
@@ -33,10 +34,8 @@ const OnboardingPage = () => {
     }
 
     useEffect(() => {
-
         if (isFetchingUser) return;
 
-        console.log("ONBOARDING PAGE:: user", user);
         if (user) {
             if (isUserDoneOnboarding(user)) {
                 router.push("/dashboard");
@@ -46,7 +45,7 @@ const OnboardingPage = () => {
         } else {
             router.push("/login");
         }
-    }, [isFetchingUser, router]);
+    }, [isFetchingUser, router, user]);
 
     if (loading) {
         return (
@@ -60,7 +59,7 @@ const OnboardingPage = () => {
             {currentStep === 2 && <StepTwo gotoStep={gotoStep} updateUserData={updateUserData} userData={userData} />}
             {currentStep === 3 && <StepThree gotoStep={gotoStep} updateUserData={updateUserDetails} userDetails={user} />} */}
 
-            {currentStep === 1 && <StepOne gotoStep={gotoStep} updateUserDetails={updateUserDetails} userDetails={user} />}
+            {currentStep === 1 && <StepOne gotoStep={gotoStep} updateUserDetails={updateUserDetails} saveUserDetails={saveUserDetails} userDetails={user} />}
             {currentStep === 2 && <StepTwo gotoStep={gotoStep} updateUserDetails={updateUserDetails} userDetails={user} />}
             {currentStep === 3 && <StepThree gotoStep={gotoStep} updateUserDetails={updateUserDetails} userDetails={user} />}
             {/* {currentStep === 4 && <StepFour gotoStep={gotoStep} updateUserDetails={updateUserDetails} userDetails={user} />} */}

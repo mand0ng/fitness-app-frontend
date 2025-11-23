@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { IUser } from "@/context/user-context";
 import { isUserStepThreeCompleted } from "@/utils/utils";
 import Review from "./review";
-
+import { getUserContext } from "@/context/user-context";
 
 interface StepThreeProps {
     gotoStep: (step: number) => void;
@@ -13,18 +13,13 @@ interface StepThreeProps {
 }
 
 const StepThree = ({ gotoStep, updateUserDetails, userDetails }: StepThreeProps) => {
-    const [enableBtn, setEnableBtn] = useState(false);
+    const [enableBtn, setEnableBtn] = useState(true);
     const [review, setReview] = useState(false);
-    const [notes, setNotes] = useState('');
+    const [notes, setNotes] = useState(userDetails?.notes || '');
     const [notesError, setNotesError] = useState<string | null>(null);
-    const MAX_NOTES_LENGTH = 500;
+    const MAX_NOTES_LENGTH = 100;
+    const { saveUserDetails } = getUserContext();
 
-
-    const handleChange = (field: keyof IUser) => (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        if (updateUserDetails) {
-            updateUserDetails(field, e.target.value);
-        }
-    };
 
     const textareaChangeHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
@@ -40,30 +35,37 @@ const StepThree = ({ gotoStep, updateUserDetails, userDetails }: StepThreeProps)
     };
 
     const validateForm = () => {
-        if (isUserStepThreeCompleted(userDetails)) {
-            setEnableBtn(true);
+        if (notes.length > 0) {
+            // setEnableBtn(true);
+            return true;
         } else {
-            setEnableBtn(false);
+            // setEnableBtn(false);
+            return false;
         }
     }
 
-    useEffect(() => {
-        validateForm();
-    }, [userDetails]);
+    // useEffect(() => {
+    //     validateForm();
+    // }, [notes]);
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
         // Final validation before submit
         if (notes.length > MAX_NOTES_LENGTH) {
             setNotesError(`Notes must be ${MAX_NOTES_LENGTH} characters or less`);
             return;
         }
-
-        if (updateUserDetails) {
-            updateUserDetails('notes', notes);
-            setReview(true);
-        }
+        setNotes(notes);
+        setReview(true);
     };
 
+    const onReviewSubmit = async () => {
+        if (saveUserDetails) {
+            if (validateForm()) {
+                await saveUserDetails('notes', notes);
+            }
+            gotoStep(5);
+        }
+    };
 
 
     return (
@@ -72,7 +74,7 @@ const StepThree = ({ gotoStep, updateUserDetails, userDetails }: StepThreeProps)
             {review && (
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
                     <div className="bg-(--card-background) p-6 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
-                        <Review userDetails={userDetails} gotoStep={gotoStep} />
+                        <Review userDetails={userDetails ? { ...userDetails, notes } : null} gotoStep={gotoStep} onReviewSubmit={onReviewSubmit} />
                         <button
                             onClick={() => setReview(false)}
                             className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -112,10 +114,10 @@ const StepThree = ({ gotoStep, updateUserDetails, userDetails }: StepThreeProps)
                                 placeholder="e.g., knee pain, shoulder injury, back issues, limited mobility..."
                                 value={notes}
                                 onChange={textareaChangeHandler}
-                                maxLength={500}
+                                maxLength={MAX_NOTES_LENGTH}
                             />
                             <div className="flex justify-between items-center mt-1">
-                                <span className="text-xs text-gray-500">{notes.length}/500 characters</span>
+                                <span className="text-xs text-gray-500">{notes.length}/{MAX_NOTES_LENGTH} characters</span>
                                 {notesError && <p className="text-red-500 text-xs">{notesError}</p>}
                             </div>
                         </div>
@@ -163,13 +165,6 @@ const StepThree = ({ gotoStep, updateUserDetails, userDetails }: StepThreeProps)
                         </button>
                     </div>
                 </div>
-                {/* // )} */}
-
-                {/* {review && (
-                <Review userDetails={userDetails} gotoStep={gotoStep} />
-            )} */}
-
-
             </div>
         </div>
     );

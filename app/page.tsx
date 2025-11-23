@@ -22,7 +22,6 @@ export default function Home() {
     if (isFetchingUser) return;
 
     if (userIsLoggedIn()) {
-      console.log("User is logged in");
       if (isUserDoneOnboarding(user)) {
         router.push("/dashboard");
       } else {

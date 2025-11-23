@@ -46,6 +46,9 @@ export interface IUserContextType {
     userIsLoggedIn: () => boolean;
     updateUserDetails: (field: keyof IUser, value: any) => void;
     getUserWorkoutProgram: () => void;
+    saveUserDetails: (field: keyof IUser, value: any) => Promise<void>;
+    isFromStepTwo: () => boolean;
+    setFromStepTwo: (value: boolean) => void;
 }
 
 const UserContext = createContext<IUserContextType | undefined>(undefined);
@@ -54,7 +57,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<IUser | null>(null);
     const [isFetchingUser, setIsFetchingUser] = useState(true);
     const [token, setToken] = useState<string | null>(null);
-    const [userDetailsToBeUpdated, setUserDetailsToBeUpdated] = useState<IUser | null>(null);
+    const [fromStepTwoUserContext, setFromStepTwoUserContext] = useState(false);
 
     useEffect(() => {
         // Check for existing session (e.g., in localStorage)
@@ -72,7 +75,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem("user", JSON.stringify(user));
+        if (user) {
+            localStorage.setItem("user", JSON.stringify(user));
+        }
     }, [user]);
 
     const checkToken = async () => {
@@ -125,8 +130,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         const response = await authService.createUser(userData);
 
         if (response.status === "success") {
+            // redirects user directly to onboarding page
             setUser(response.user);
-            Cookies.set('user_token', response.token, { expires: 1 });
+            Cookies.set('user_token', response.token, { expires: 1 / 24 }); // 1 hour
         }
 
         if (response.status === "error") {
@@ -148,12 +154,29 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     const updateUserDetails = async (field: keyof IUser, value: any) => {
         if (!user) return;
-        if (value == '') return;
-        if (userDetailsToBeUpdated?.[field] == value) return;
-        if (!value) return;
+        setUser({ ...user, [field]: value });
+    };
 
-        // Use nullish coalescing to handle null case
-        setUserDetailsToBeUpdated({ ...(userDetailsToBeUpdated || {}), [field]: value } as IUser);
+    const saveUserDetails = async (field: keyof IUser, value: any) => {
+        if (!user) return;
+        console.log("saveUserDetails", field, value);
+        console.log(user[field], value);
+
+        if (field === "age") {
+            value = parseInt(value);
+        }
+
+        if (field === "weight") {
+            value = parseFloat(value);
+        }
+
+        if (field === "height") {
+            value = parseInt(value);
+        }
+
+        if (user[field] === value) return;
+        console.log("return flag")
+
         await userService.updateUserDetails(user.id, field, value).then((response) => {
             if (response.status === "success") {
                 setUser(response.user);
@@ -168,6 +191,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         console.log(response);
     };
 
+    const isFromStepTwo = () => {
+        return fromStepTwoUserContext;
+    };
+
+    const setFromStepTwo = (value: boolean) => {
+        setFromStepTwoUserContext(value);
+    };
+
     return (
         <UserContext.Provider
             value={{
@@ -180,7 +211,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                 getToken,
                 userIsLoggedIn,
                 updateUserDetails,
-                getUserWorkoutProgram
+                saveUserDetails,
+                getUserWorkoutProgram,
+                isFromStepTwo,
+                setFromStepTwo
             }}>
             {children}
         </UserContext.Provider>

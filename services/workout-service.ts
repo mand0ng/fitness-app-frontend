@@ -82,15 +82,15 @@ export const workoutService = {
         return new Promise((resolve, reject) => {
             const interval = setInterval(async () => {
                 try {
-                    const status = await workoutService.getJobStatus(token, jobId);
+                    const data = await workoutService.getJobStatus(token, jobId);
 
                     if (onProgress) {
-                        onProgress(status);
+                        onProgress(data);
                     }
 
-                    if (status.status === 'completed' || status.status === 'failed') {
+                    if (data.job_status.status === 'completed' || data.job_status.status === 'failed') {
                         clearInterval(interval);
-                        resolve(status);
+                        resolve(data);
                     }
                 } catch (error) {
                     clearInterval(interval);

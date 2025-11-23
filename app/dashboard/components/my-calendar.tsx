@@ -65,8 +65,9 @@ const MyCalendar = ({ workoutData }: MyCalendarProps) => {
                     {workoutData ? 'Click on any day to view workout details!' : 'No workout plan yet.'}
                 </p>
             </div>
-            <div className="border border-(--muted) rounded-lg shadow-lg p-10 my-secondary-bg flex items-start gap-6">
-                <div className="flex-1">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Column: Calendar */}
+                <div className="border border-(--muted) rounded-lg shadow-lg p-10 my-secondary-bg">
                     <Calendar
                         localizer={localizer}
                         events={events}
@@ -92,85 +93,122 @@ const MyCalendar = ({ workoutData }: MyCalendarProps) => {
                     />
                 </div>
 
-                {/* Workout Details Panel */}
-                {selectedDay && (
-                    <div className="w-96 border border-(--muted) rounded-lg p-6 bg-background">
-                        <h2 className="text-xl font-bold mb-4">
-                            Day {selectedDay.day} - {new Date(selectedDay.date).toLocaleDateString()}
-                        </h2>
-
-                        {selectedDay.type === 'rest' ? (
-                            <div className="text-center py-8">
-                                <p className="text-4xl mb-4">🛌</p>
-                                <p className="text-lg font-semibold">Rest Day</p>
-                                <p className="text-sm text-muted-foreground mt-2">
-                                    Take it easy and recover!
-                                </p>
+                {/* Right Column: Details Panel */}
+                <div className="border border-(--muted) rounded-lg p-6 my-secondary-bg h-full min-h-[500px]">
+                    {selectedDay ? (
+                        // Selected Day View
+                        <div className="h-full flex flex-col">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-bold">
+                                    Day {selectedDay.day} - {new Date(selectedDay.date).toLocaleDateString()}
+                                </h2>
+                                <button
+                                    onClick={() => setSelectedDay(null)}
+                                    className="text-sm text-muted-foreground hover:text-primary"
+                                >
+                                    Back to Overview
+                                </button>
                             </div>
-                        ) : selectedDay.workout ? (
-                            <div className="space-y-4 max-h-[600px] overflow-y-auto">
-                                <div>
-                                    <p className="text-sm font-semibold text-primary">Focus: {selectedDay.workout.focus}</p>
-                                    <p className="text-xs text-muted-foreground">Duration: {selectedDay.workout.estimated_duration}</p>
-                                </div>
 
-                                {/* Warm-up */}
-                                <div>
-                                    <h3 className="font-semibold mb-2">Warm-up</h3>
-                                    <div className="space-y-1">
-                                        {selectedDay.workout.warm_up.map((exercise, idx) => (
-                                            <p key={idx} className="text-sm">
-                                                • {exercise.name} - {exercise.duration}
-                                            </p>
-                                        ))}
+                            {selectedDay.type === 'rest' ? (
+                                <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
+                                    <p className="text-6xl mb-4">🛌</p>
+                                    <p className="text-2xl font-semibold">Rest Day</p>
+                                    <p className="text-muted-foreground mt-2">
+                                        Take it easy and recover!
+                                    </p>
+                                </div>
+                            ) : selectedDay.workout ? (
+                                <div className="flex-1 overflow-y-auto pr-2 space-y-6">
+                                    <div>
+                                        <p className="text-lg font-semibold text-primary">Focus: {selectedDay.workout.focus}</p>
+                                        <p className="text-sm text-muted-foreground">Duration: {selectedDay.workout.estimated_duration}</p>
+                                    </div>
+
+                                    {/* Warm-up */}
+                                    <div>
+                                        <h3 className="font-semibold mb-2 text-lg border-b border-(--muted) pb-1">Warm-up</h3>
+                                        <div className="space-y-2">
+                                            {selectedDay.workout.warm_up.map((exercise, idx) => (
+                                                <div key={idx} className="flex justify-between text-sm">
+                                                    <span>• {exercise.name}</span>
+                                                    <span className="text-muted-foreground">{exercise.duration}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Exercises */}
+                                    <div>
+                                        <h3 className="font-semibold mb-2 text-lg border-b border-(--muted) pb-1">Exercises</h3>
+                                        <div className="space-y-4">
+                                            {selectedDay.workout.exercises.map((exercise, idx) => (
+                                                <div key={idx} className="bg-(--card-background) p-3 rounded-md border border-(--muted)">
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <p className="font-medium">{exercise.name}</p>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                                                        <p>{exercise.sets} sets × {exercise.reps}</p>
+                                                        <p>Weight: {exercise.estimated_weight}</p>
+                                                        <p>Rest: {exercise.rest}</p>
+                                                    </div>
+                                                    {exercise.notes && (
+                                                        <p className="text-xs italic text-muted-foreground mt-2 border-t border-(--muted) pt-1">
+                                                            Note: {exercise.notes}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Cooldown */}
+                                    <div>
+                                        <h3 className="font-semibold mb-2 text-lg border-b border-(--muted) pb-1">Cooldown</h3>
+                                        <div className="space-y-2">
+                                            {selectedDay.workout.cooldown.map((exercise, idx) => (
+                                                <div key={idx} className="flex justify-between text-sm">
+                                                    <span>• {exercise.name}</span>
+                                                    <span className="text-muted-foreground">{exercise.duration}</span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* Exercises */}
-                                <div>
-                                    <h3 className="font-semibold mb-2">Exercises</h3>
-                                    <div className="space-y-3">
-                                        {selectedDay.workout.exercises.map((exercise, idx) => (
-                                            <div key={idx} className="border-l-2 border-primary pl-3">
-                                                <p className="font-medium text-sm">{exercise.name}</p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {exercise.sets} sets × {exercise.reps} reps
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Weight: {exercise.estimated_weight} | Rest: {exercise.rest}
-                                                </p>
-                                                {exercise.notes && (
-                                                    <p className="text-xs italic text-muted-foreground mt-1">
-                                                        Note: {exercise.notes}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
+                            ) : (
+                                <div className="flex-1 flex items-center justify-center">
+                                    <p className="text-muted-foreground">No workout details available.</p>
                                 </div>
+                            )}
+                        </div>
+                    ) : (
+                        // Default View: Coach Notes
+                        <div className="h-full flex flex-col">
+                            <h2 className="text-xl font-bold mb-4 border-b border-(--muted) pb-2">Program Overview</h2>
 
-                                {/* Cooldown */}
-                                <div>
-                                    <h3 className="font-semibold mb-2">Cooldown</h3>
-                                    <div className="space-y-1">
-                                        {selectedDay.workout.cooldown.map((exercise, idx) => (
-                                            <p key={idx} className="text-sm">
-                                                • {exercise.name} - {exercise.duration}
-                                            </p>
-                                        ))}
+                            <div className="flex-1 overflow-y-auto">
+                                {workoutData?.notes_from_coach ? (
+                                    <div className="mb-6">
+                                        <h3 className="font-semibold mb-2 text-lg text-primary">Coach's Notes</h3>
+                                        <div className="bg-(--card-background) p-4 rounded-lg border border-(--muted) italic text-muted-foreground">
+                                            "{workoutData.notes_from_coach}"
+                                        </div>
                                     </div>
+                                ) : (
+                                    <p className="text-muted-foreground mb-6">No coach notes available for this program.</p>
+                                )}
+
+                                <div className="flex flex-col items-center justify-center py-10 text-center opacity-60">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <p className="text-lg font-medium">Select a day on the calendar</p>
+                                    <p className="text-sm">Click any date to view your detailed workout plan</p>
                                 </div>
                             </div>
-                        ) : null}
-
-                        <button
-                            onClick={() => setSelectedDay(null)}
-                            className="mt-4 w-full px-4 py-2 bg-muted text-sm rounded-lg hover:bg-muted/80"
-                        >
-                            Close
-                        </button>
-                    </div>
-                )}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

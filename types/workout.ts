@@ -45,9 +45,15 @@ export interface WorkoutResponse {
 }
 
 export interface JobStatusResponse {
-    status: 'processing' | 'completed' | 'failed' | 'not_found';
-    error?: string;
-    workout_plan?: string;
+    // job_status: 'processing' | 'completed' | 'failed' | 'not_found';
+    // error?: string;
+    // workout_plan?: string;
+    job_status: {
+        status: 'processing' | 'completed' | 'failed' | 'not_found';
+        error?: string;
+        workout_plan?: string;
+    },
+    status: 'success' | 'error';
 }
 
 export interface CreateWorkoutResponse {

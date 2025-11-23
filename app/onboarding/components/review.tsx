@@ -4,9 +4,10 @@ import { capitalizeFirstLetterArray, capitalizeFirstLetter, replaceUnderScoreWit
 interface ReviewProps {
     userDetails: IUser | null;
     gotoStep: (step: number) => void;
+    onReviewSubmit: () => void;
 }
 
-const Review = ({ userDetails, gotoStep }: ReviewProps) => {
+const Review = ({ userDetails, gotoStep, onReviewSubmit }: ReviewProps) => {
 
     return (
         <div className="flex flex-col items-center justify-items-center ">
@@ -66,7 +67,7 @@ const Review = ({ userDetails, gotoStep }: ReviewProps) => {
                     <button onClick={() => gotoStep(1)} className="mt-8 w-full bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-md transition-colors">
                         Edit
                     </button>
-                    <button onClick={() => gotoStep(5)} className="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-md transition-colors">
+                    <button onClick={() => onReviewSubmit()} className="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-md transition-colors">
                         Proceed
                     </button>
                 </div>

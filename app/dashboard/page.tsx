@@ -1,6 +1,7 @@
 'use client';
 import Header from "../components/header";
 import Footer from "../components/footer";
+import UserDetails from "./components/user-details";
 import MyCalendar from "./components/my-calendar";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -19,8 +20,6 @@ const Dashboard = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        console.log("Dashboard:: user", user);
-
         if (isFetchingUser) return;
 
         if (!user || !userIsLoggedIn) {
@@ -92,15 +91,17 @@ const Dashboard = () => {
             const jobResult = await workoutService.pollJobStatus(
                 token,
                 createResponse.job_id,
-                (status) => {
-                    if (status.status === 'processing') {
+                (data) => {
+                    console.log("job status", data);
+                    if (data.job_status.status === 'processing') {
                         setGenerationProgress('Still generating... Please wait.');
                     }
                 }
             );
+            console.log(jobResult);
 
-            if (jobResult.status === 'failed') {
-                setError(jobResult.error || 'Workout generation failed');
+            if (jobResult.job_status.status === 'failed') {
+                setError(jobResult.job_status.error || 'Workout generation failed');
                 setGeneratingWorkout(false);
                 setLoading(false);
                 return;
@@ -162,6 +163,8 @@ const Dashboard = () => {
                 <div className="border border-(--muted) rounded-lg shadow-lg p-10 my-secondary-bg mb-10">
                     <h1 className="text-2xl font-bold mb-2">Welcome back {user?.name || 'Jane Doe'}!</h1>
                 </div>
+
+                {user && <UserDetails user={user} />}
                 <MyCalendar workoutData={workoutData} />
             </section>
             <Footer />

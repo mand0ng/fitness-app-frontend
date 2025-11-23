@@ -37,6 +37,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // const pathname = usePathname();
+  // console.log("ROOT LAYOUT:: pathname", pathname);
+
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body>

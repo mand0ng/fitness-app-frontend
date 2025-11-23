@@ -3,25 +3,63 @@ import { useEffect, useState } from 'react';
 import ProgressBar from './progress-bar';
 import { IUser } from '@/context/user-context';
 import { isUserStepOneCompleted } from '@/utils/utils';
+import { getUserContext } from '@/context/user-context';
 
 interface StepOneProps {
     gotoStep: (step: number) => void;
     updateUserDetails: (field: keyof IUser, value: any) => void;
+    saveUserDetails: (field: keyof IUser, value: any) => void;
     userDetails: IUser | null;
 }
 
-const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => {
+const StepOne = ({ gotoStep, updateUserDetails, saveUserDetails, userDetails }: StepOneProps) => {
     const [enableBtn, setEnableBtn] = useState(false);
     const [errors, setErrors] = useState<Partial<Record<keyof IUser, string>>>({});
-    const [age, setAge] = useState('');
-    const [weight, setWeight] = useState('');
-    const [height, setHeight] = useState('');
-    const [gender, setGender] = useState('');
-    const [fitnessLevel, setFitnessLevel] = useState('');
-    const [fitnessGoal, setFitnessGoal] = useState('');
+    const [age, setAge] = useState(userDetails?.age || '');
+    const [weight, setWeight] = useState(userDetails?.weight || '');
+    const [height, setHeight] = useState(userDetails?.height || '');
+    const [gender, setGender] = useState(userDetails?.gender || '');
+    const [fitnessLevel, setFitnessLevel] = useState(userDetails?.fitnessLevel || '');
+    const [fitnessGoal, setFitnessGoal] = useState(userDetails?.fitnessGoal || '');
+    const { isFetchingUser, isFromStepTwo, setFromStepTwo } = getUserContext();
+
+    const handleSubmit = () => {
+        console.log("handleSubmit")
+
+        console.log(age, weight, height, gender, fitnessLevel, fitnessGoal)
+        console.log(errors)
+        console.log(isUserStepOneCompleted(userDetails || null))
+
+        if (!age ||
+            !weight ||
+            !height ||
+            !gender ||
+            !fitnessLevel ||
+            !fitnessGoal ||
+            Object.values(errors).some(error => error)
+        ) {
+            return;
+        }
+
+        saveUserDetails('age', age);
+        saveUserDetails('weight', weight);
+        saveUserDetails('height', height);
+        saveUserDetails('gender', gender);
+        saveUserDetails('fitnessLevel', fitnessLevel);
+        saveUserDetails('fitnessGoal', fitnessGoal);
+
+        gotoStep(2);
+    };
 
     const enableNextStepButton = () => {
-        if (isUserStepOneCompleted(userDetails || null)) {
+        if (age !== '' &&
+            weight !== '' &&
+            height !== '' &&
+            gender !== '' &&
+            fitnessLevel !== '' &&
+            fitnessGoal !== '' &&
+            Object.values(errors).every(error => !error)
+        ) {
             setEnableBtn(true);
         } else {
             setEnableBtn(false);
@@ -78,6 +116,32 @@ const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => 
     const handleChange = (field: keyof IUser) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const value = e.target.value;
 
+        if (field === 'age') {
+            setAge(value);
+        } else if (field === 'weight') {
+            // if value has decimal
+            if (value.includes('.')) {
+                const weight = parseFloat(value).toFixed(1);
+                setWeight(weight);
+            } else {
+                setWeight(value);
+            }
+        } else if (field === 'height') {
+            // if value has decimal
+            if (value.includes('.')) {
+                const height = parseInt(value);
+                setHeight(height);
+            } else {
+                setHeight(value);
+            }
+        } else if (field === 'gender') {
+            setGender(value);
+        } else if (field === 'fitnessLevel') {
+            setFitnessLevel(value);
+        } else if (field === 'fitnessGoal') {
+            setFitnessGoal(value);
+        }
+
         // Validate the field
         const error = validateField(field, value);
 
@@ -86,15 +150,46 @@ const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => 
             ...prev,
             [field]: error || undefined
         }));
+    };
 
-        // Only update user details if there's no error and value is not empty
-        if (!error && value !== '') {
-            updateUserDetails(field, value);
+    const handleBlur = (field: keyof IUser) => (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const value = e.target.value;
+
+        // Format and update local state for specific fields
+        if (field === 'weight') {
+            if (value === '') {
+                setWeight('');
+            } else {
+                const weight = parseFloat(value).toFixed(1);
+                setWeight(weight);
+            }
+        } else if (field === 'height') {
+            if (value === '') {
+                setHeight('');
+            } else {
+                const height = parseInt(value);
+                setHeight(height);
+            }
+        }
+    };
+
+    const setUserDetailsToPage = (user: IUser | null) => {
+        if (user) {
+            setAge(user.age?.toString() || '');
+            setWeight(user.weight?.toString() || '');
+            setHeight(user.height?.toString() || '');
+            setGender(user.gender || '');
+            setFitnessLevel(user.fitnessLevel || '');
+            setFitnessGoal(user.fitnessGoal || '');
         }
     };
 
     useEffect(() => {
         enableNextStepButton();
+    }, [age, weight, height, gender, fitnessLevel, fitnessGoal, errors]);
+
+    useEffect(() => {
+        setUserDetailsToPage(userDetails);
     }, [userDetails]);
 
     return (
@@ -118,8 +213,11 @@ const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => 
                             id="age"
                             className={`w-full border ${errors.age ? 'border-red-500' : 'border-(--muted)'} rounded-md p-2 primary-text`}
                             placeholder="Enter your age"
-                            value={userDetails?.age || ''}
-                            onChange={handleChange('age')}
+                            value={age}
+                            onChange={(e) => handleChange('age')(e)}
+                            min="1"
+                            max="100"
+                            step="1"
                         />
                         {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
                     </div>
@@ -132,8 +230,8 @@ const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => 
                         <select
                             id="gender"
                             className="w-full border border-(--muted) rounded-md p-2 primary-text"
-                            value={userDetails?.gender || ''}
-                            onChange={handleChange('gender')}
+                            value={gender}
+                            onChange={(e) => handleChange('gender')(e)}
                         >
                             <option value="">-- Select birth gender --</option>
                             <option value="male">Male</option>
@@ -151,9 +249,11 @@ const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => 
                             id="weight"
                             className={`w-full border ${errors.weight ? 'border-red-500' : 'border-(--muted)'} rounded-md p-2 primary-text`}
                             placeholder="Enter your weight"
-                            value={userDetails?.weight || ''}
-                            onChange={handleChange('weight')}
-
+                            value={weight}
+                            onChange={(e) => handleChange('weight')(e)}
+                            min="1"
+                            max="1000"
+                            onBlur={handleBlur('weight')}
                         />
                         {errors.weight && <p className="text-red-500 text-xs mt-1">{errors.weight}</p>}
                     </div>
@@ -168,8 +268,11 @@ const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => 
                             id="height"
                             className={`w-full border ${errors.height ? 'border-red-500' : 'border-(--muted)'} rounded-md p-2 primary-text`}
                             placeholder="Enter your height"
-                            value={userDetails?.height || ''}
-                            onChange={handleChange('height')}
+                            value={height}
+                            onChange={(e) => handleChange('height')(e)}
+                            min="100"
+                            max="300"
+                            onBlur={handleBlur('height')}
                         />
                         {errors.height && <p className="text-red-500 text-xs mt-1">{errors.height}</p>}
                     </div>
@@ -187,8 +290,8 @@ const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => 
                         <select
                             id="fitness-level"
                             className="w-full border border-(--muted) rounded-md p-2 primary-text"
-                            value={userDetails?.fitnessLevel || ''}
-                            onChange={handleChange('fitnessLevel')}
+                            value={fitnessLevel}
+                            onChange={(e) => handleChange('fitnessLevel')(e)}
                         >
                             <option value="">-- Select a level --</option>
                             <option value="beginner">Beginner</option>
@@ -204,8 +307,8 @@ const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => 
                         <select
                             id="goals"
                             className="w-full border border-(--muted) rounded-md p-2 primary-text"
-                            value={userDetails?.fitnessGoal || ''}
-                            onChange={handleChange('fitnessGoal')}
+                            value={fitnessGoal}
+                            onChange={(e) => handleChange('fitnessGoal')(e)}
                         >
                             <option value="">-- Select a goal --</option>
                             <option value="lose weight">Lose Weight</option>
@@ -217,7 +320,7 @@ const StepOne = ({ gotoStep, updateUserDetails, userDetails }: StepOneProps) => 
                 </div>
 
                 <div className="flex justify-center mt-6">
-                    <button disabled={!enableBtn} onClick={() => gotoStep && gotoStep(2)} className={`w-8/10 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md ${enableBtn ? '' : 'opacity-50 cursor-not-allowed'}`}>
+                    <button disabled={!enableBtn} onClick={() => handleSubmit()} className={`w-8/10 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md ${enableBtn ? '' : 'opacity-50 cursor-not-allowed'}`}>
                         Next
                     </button>
                 </div>

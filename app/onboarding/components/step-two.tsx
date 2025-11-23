@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import ProgressBar from "./progress-bar";
 import { IUser } from '@/context/user-context';
 import { isUserStepTwoCompleted } from '@/utils/utils';
+import { getUserContext } from '@/context/user-context';
 
 interface StepTwoProps {
     gotoStep: (step: number) => void;
@@ -23,21 +24,25 @@ const StepTwo = ({ gotoStep, updateUserDetails, userDetails }: StepTwoProps) => 
         { label: "Full Gym Access", value: "full gym access" }
     ];
     const [enableBtn, setEnableBtn] = useState(false);
-    const [review, setReview] = useState(false);
     const [errors, setErrors] = useState<{ daysAvailability?: string; equipmentAvailability?: string }>({});
+    const [workoutLocation, setWorkoutLocation] = useState(userDetails?.workoutLocation || '');
+    const [daysAvailability, setDaysAvailability] = useState(userDetails?.daysAvailability || []);
+    const [equipmentAvailability, setEquipmentAvailability] = useState(userDetails?.equipmentAvailability || []);
+    const { saveUserDetails, setFromStepTwo } = getUserContext();
 
     const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         // Validate workout location
         const validLocations = ['home workout', 'gym workout', 'both home and gym'];
         if (validLocations.includes(value)) {
-            updateUserDetails('workoutLocation', value);
+            // updateUserDetails('workoutLocation', value);
+            setWorkoutLocation(value);
         }
     };
 
     const handleAvailabilityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        let updatedDays = userDetails?.daysAvailability || [];
+        let updatedDays = daysAvailability || [];
         if (e.target.checked) {
             updatedDays = [...updatedDays, value];
         } else {
@@ -51,12 +56,13 @@ const StepTwo = ({ gotoStep, updateUserDetails, userDetails }: StepTwoProps) => 
             setErrors(prev => ({ ...prev, daysAvailability: undefined }));
         }
 
-        updateUserDetails('daysAvailability', updatedDays);
+        // updateUserDetails('daysAvailability', updatedDays);
+        setDaysAvailability(updatedDays);
     }
 
     const handleEquipmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        let updatedEquipment = userDetails?.equipmentAvailability || [];
+        let updatedEquipment = equipmentAvailability || [];
         if (e.target.checked) {
             updatedEquipment = [...updatedEquipment, value];
         } else {
@@ -71,20 +77,42 @@ const StepTwo = ({ gotoStep, updateUserDetails, userDetails }: StepTwoProps) => 
             setErrors(prev => ({ ...prev, equipmentAvailability: undefined }));
         }
 
-        updateUserDetails('equipmentAvailability', updatedEquipment);
+        // updateUserDetails('equipmentAvailability', updatedEquipment);
+        setEquipmentAvailability(updatedEquipment);
     };
 
     const validateForm = () => {
-        if (isUserStepTwoCompleted(userDetails)) {
+        if (!errors.daysAvailability &&
+            !errors.equipmentAvailability &&
+            workoutLocation &&
+            daysAvailability.length >= 3 &&
+            equipmentAvailability.length >= 1
+        ) {
             setEnableBtn(true);
+            return true;
         } else {
             setEnableBtn(false);
+            return false;
         }
+    };
+
+    const handleSubmit = () => {
+        if (validateForm()) {
+            saveUserDetails("workoutLocation", workoutLocation);
+            saveUserDetails("daysAvailability", daysAvailability);
+            saveUserDetails("equipmentAvailability", equipmentAvailability);
+            gotoStep && gotoStep(3);
+        }
+    };
+
+    const handleBack = () => {
+        setFromStepTwo(true);
+        gotoStep && gotoStep(1);
     };
 
     useEffect(() => {
         validateForm();
-    }, [userDetails]);
+    }, [workoutLocation, daysAvailability, equipmentAvailability]);
 
 
     return (
@@ -114,15 +142,15 @@ const StepTwo = ({ gotoStep, updateUserDetails, userDetails }: StepTwoProps) => 
                         </p>
                         <div className="mt-2 flex flex-col md:flex-row gap-4 justify-center">
                             <label className="flex items-center gap-2">
-                                <input type="radio" name="workout-location" value="home workout" checked={userDetails?.workoutLocation === 'home workout'} onChange={handleLocationChange} />
+                                <input type="radio" name="workout-location" value="home workout" checked={workoutLocation === 'home workout'} onChange={handleLocationChange} />
                                 Home Workouts
                             </label>
                             <label className="flex items-center gap-2">
-                                <input type="radio" name="workout-location" value="gym workout" checked={userDetails?.workoutLocation === 'gym workout'} onChange={handleLocationChange} />
+                                <input type="radio" name="workout-location" value="gym workout" checked={workoutLocation === 'gym workout'} onChange={handleLocationChange} />
                                 Gym Workouts
                             </label>
                             <label className="flex items-center gap-2">
-                                <input type="radio" name="workout-location" value="both home and gym" checked={userDetails?.workoutLocation === 'both home and gym'} onChange={handleLocationChange} />
+                                <input type="radio" name="workout-location" value="both home and gym" checked={workoutLocation === 'both home and gym'} onChange={handleLocationChange} />
                                 Both Home and Gym
                             </label>
                         </div>
@@ -145,7 +173,7 @@ const StepTwo = ({ gotoStep, updateUserDetails, userDetails }: StepTwoProps) => 
                                         type="checkbox"
                                         name="availability"
                                         value={day.toLowerCase()}
-                                        checked={userDetails?.daysAvailability?.includes(day.toLowerCase()) ?? false}
+                                        checked={daysAvailability?.includes(day.toLowerCase()) ?? false}
                                         onChange={handleAvailabilityChange}
                                     />
                                     {day}s
@@ -174,7 +202,7 @@ const StepTwo = ({ gotoStep, updateUserDetails, userDetails }: StepTwoProps) => 
                                         type="checkbox"
                                         name="equipment"
                                         value={option.value}
-                                        checked={userDetails?.equipmentAvailability?.includes(option.value) ?? false}
+                                        checked={equipmentAvailability?.includes(option.value) ?? false}
                                         onChange={handleEquipmentChange}
                                     />
                                     {option.label}
@@ -187,10 +215,10 @@ const StepTwo = ({ gotoStep, updateUserDetails, userDetails }: StepTwoProps) => 
                 </div>
 
                 <div className="mt-10 flex justify-between items-center">
-                    <button onClick={() => gotoStep && gotoStep(1)} className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md text-sm">
+                    <button onClick={() => handleBack()} className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md text-sm">
                         Back
                     </button>
-                    <button disabled={!enableBtn} onClick={() => gotoStep && gotoStep(3)} className={` ${enableBtn ? "bg-blue-500" : "bg-blue-300"} px-4 py-2 text-white rounded-md text-sm`}>
+                    <button disabled={!enableBtn} onClick={() => handleSubmit()} className={` ${enableBtn ? "bg-blue-500" : "bg-blue-300"} px-4 py-2 text-white rounded-md text-sm`}>
                         Next
                     </button>
                 </div>

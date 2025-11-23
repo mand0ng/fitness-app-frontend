@@ -20,8 +20,11 @@ export const isUserDoneOnboarding = (user: IUser | null): boolean => {
         !!user.fitnessGoal &&
         !!user.workoutLocation &&
         !!user.daysAvailability &&
-        !!user.equipmentAvailability &&
-        !!user.notes
+
+        !!user.equipmentAvailability
+
+        // !!user.equipmentAvailability &&
+        // !!user.notes
     ) {
         return true;
     }
