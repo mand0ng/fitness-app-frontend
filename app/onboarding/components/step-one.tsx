@@ -298,6 +298,11 @@ const StepOne = ({ gotoStep, updateUserDetails, saveUserDetails, userDetails }: 
                             <option value="intermediate">Intermediate</option>
                             <option value="advance">Advance</option>
                         </select>
+                        <div className="mt-2 text-xs sub-text">
+                            <p><span className="font-bold">Beginner:</span> Less than 6 months of experience. You are learning proper form and building a routine.</p>
+                            <p className="mt-1"><span className="font-bold">Intermediate:</span> 6 months to 2 years of consistent training. You are comfortable with main lifts (Squat, Bench, Deadlift) and want to increase strength/muscle.</p>
+                            <p className="mt-1"><span className="font-bold">Advanced:</span> 2+ years of consistent training. You have specific performance goals and require high volume or specialized techniques to progress.</p>
+                        </div>
                     </div>
 
                     <div className="mb-4">

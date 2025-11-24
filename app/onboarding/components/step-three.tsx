@@ -100,15 +100,15 @@ const StepThree = ({ gotoStep, updateUserDetails, userDetails }: StepThreeProps)
 
 
                     <div>
-                        <span>
-                            Injuries or Limitations
-                        </span>
+                        <p>
+                            Injuries / Limitations / Specific Focus <span className="sub-text text-xs">(Optional)</span>
+                        </p>
 
                         <div className="mt-2">
                             <textarea
                                 className={`w-full border ${notesError ? 'border-red-500' : 'border-(--muted)'} rounded-md p-2 primary-text`}
                                 rows={4}
-                                placeholder="e.g., knee pain, shoulder injury, back issues, limited mobility..."
+                                placeholder="e.g., Injury: Knee Pain, Limitation: Limited Mobility, Specific Focus: Chest, Glutes"
                                 value={notes}
                                 onChange={textareaChangeHandler}
                                 maxLength={MAX_NOTES_LENGTH}
