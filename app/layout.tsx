@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../context/theme-provider";
 import { UserProvider } from "../context/user-context"
+import { WorkoutProvider } from "../context/workout-context"
 import DynamicFavicon from "./components/DynamicFavicon";
 
 
@@ -44,15 +45,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning={true}>
       <body>
         <UserProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <DynamicFavicon />
-            {children}
-          </ThemeProvider>
+          <WorkoutProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <DynamicFavicon />
+              {children}
+            </ThemeProvider>
+          </WorkoutProvider>
         </UserProvider>
       </body>
     </html >

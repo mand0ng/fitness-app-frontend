@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { IUser } from "@/context/user-context";
 import { isUserStepThreeCompleted } from "@/utils/utils";
 import Review from "./review";
-import { getUserContext } from "@/context/user-context";
+import { useUser } from "@/context/user-context";
 
 interface StepThreeProps {
     gotoStep: (step: number) => void;
@@ -18,7 +18,7 @@ const StepThree = ({ gotoStep, updateUserDetails, userDetails }: StepThreeProps)
     const [notes, setNotes] = useState(userDetails?.notes || '');
     const [notesError, setNotesError] = useState<string | null>(null);
     const MAX_NOTES_LENGTH = 100;
-    const { saveUserDetails } = getUserContext();
+    const { saveUserDetails } = useUser();
 
 
     const textareaChangeHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -32,6 +32,7 @@ const StepThree = ({ gotoStep, updateUserDetails, userDetails }: StepThreeProps)
         }
 
         setNotes(value);
+        saveUserDetails('notes', value);
     };
 
     const validateForm = () => {
@@ -43,10 +44,6 @@ const StepThree = ({ gotoStep, updateUserDetails, userDetails }: StepThreeProps)
             return false;
         }
     }
-
-    // useEffect(() => {
-    //     validateForm();
-    // }, [notes]);
 
     const onSubmit = async () => {
         // Final validation before submit

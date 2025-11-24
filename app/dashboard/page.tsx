@@ -45,7 +45,7 @@ const Dashboard = () => {
             setLoading(true);
             setError(null);
 
-            const response = await workoutService.getUserWorkout(token);
+            const response = await workoutService.getUserWorkout(token, user?.id || '');
 
             if (response.status === 'success' && response.workout) {
                 setWorkoutData(response.workout);
@@ -69,7 +69,7 @@ const Dashboard = () => {
             setGeneratingWorkout(true);
             setGenerationProgress('Starting workout generation...');
 
-            const createResponse = await workoutService.createUserWorkout(token);
+            const createResponse = await workoutService.createUserWorkout(token, user?.id || '');
 
             if (createResponse.status === 'error') {
                 setError(createResponse.message || 'Failed to create workout');

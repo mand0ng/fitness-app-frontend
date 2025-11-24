@@ -4,18 +4,18 @@ import StepThree from "./components/step-three";
 import StepTwo from "./components/step-two";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getUserContext } from "@/context/user-context";
+import { useUser } from "@/context/user-context";
 import { isUserDoneOnboarding } from "@/utils/utils";
 import Loading from "../components/loading";
+import { useWorkout } from "@/context/workout-context";
 
 const OnboardingPage = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const router = useRouter();
-    const [token, setToken] = useState<string | null>(null);
-    const [localVarsSet, setLocalVarsSet] = useState(false);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
-    const { user, isFetchingUser, updateUserDetails, saveUserDetails } = getUserContext();
+    const { user, isFetchingUser, updateUserDetails, saveUserDetails } = useUser();
+    const { hasActiveWorkout, isLoading: isLoadingWorkout } = useWorkout();
 
     const gotoStep = (step: number) => {
         setCurrentStep(step);
@@ -35,9 +35,10 @@ const OnboardingPage = () => {
 
     useEffect(() => {
         if (isFetchingUser) return;
+        if (isLoadingWorkout) return;
 
         if (user) {
-            if (isUserDoneOnboarding(user)) {
+            if (isUserDoneOnboarding(user) && hasActiveWorkout()) {
                 router.push("/dashboard");
             } else {
                 setLoading(false);
@@ -45,7 +46,7 @@ const OnboardingPage = () => {
         } else {
             router.push("/login");
         }
-    }, [isFetchingUser, router, user]);
+    }, [isFetchingUser, isLoadingWorkout, router, user]);
 
     if (loading) {
         return (
@@ -55,16 +56,10 @@ const OnboardingPage = () => {
 
     return (
         <section className="flex items-center justify-center min-h-screen">
-            {/* {currentStep === 1 && <StepOne gotoStep={gotoStep} updateUserData={updateUserData} userData={userData} />}
-            {currentStep === 2 && <StepTwo gotoStep={gotoStep} updateUserData={updateUserData} userData={userData} />}
-            {currentStep === 3 && <StepThree gotoStep={gotoStep} updateUserData={updateUserDetails} userDetails={user} />} */}
 
             {currentStep === 1 && <StepOne gotoStep={gotoStep} updateUserDetails={updateUserDetails} saveUserDetails={saveUserDetails} userDetails={user} />}
             {currentStep === 2 && <StepTwo gotoStep={gotoStep} updateUserDetails={updateUserDetails} userDetails={user} />}
             {currentStep === 3 && <StepThree gotoStep={gotoStep} updateUserDetails={updateUserDetails} userDetails={user} />}
-            {/* {currentStep === 4 && <StepFour gotoStep={gotoStep} updateUserDetails={updateUserDetails} userDetails={user} />} */}
-
-
 
             {generating && (
                 <div className="flex flex-col items-center">

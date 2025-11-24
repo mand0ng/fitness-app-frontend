@@ -22,8 +22,8 @@ export const workoutService = {
         return data;
     },
 
-    getUserWorkout: async (token: string): Promise<WorkoutResponse> => {
-        const response = await fetch(`${API_URL}/workout/get-user-workout/1/`, {
+    getUserWorkout: async (token: string, userID: string): Promise<WorkoutResponse> => {
+        const response = await fetch(`${API_URL}/workout/get-user-workout/${userID}/`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -39,8 +39,8 @@ export const workoutService = {
         return response.json();
     },
 
-    createUserWorkout: async (token: string): Promise<CreateWorkoutResponse> => {
-        const response = await fetch(`${API_URL}/workout/create-user-workout/1/`, {
+    createUserWorkout: async (token: string, userID: string): Promise<CreateWorkoutResponse> => {
+        const response = await fetch(`${API_URL}/workout/create-user-workout/${userID}/`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

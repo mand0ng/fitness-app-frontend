@@ -45,7 +45,7 @@ export interface IUserContextType {
     getToken: () => string | null;
     userIsLoggedIn: () => boolean;
     updateUserDetails: (field: keyof IUser, value: any) => void;
-    getUserWorkoutProgram: () => void;
+
     saveUserDetails: (field: keyof IUser, value: any) => Promise<void>;
     isFromStepTwo: () => boolean;
     setFromStepTwo: (value: boolean) => void;
@@ -184,12 +184,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    const getUserWorkoutProgram = async () => {
-        if (!user) return;
-        const response = await workoutService.getUserWorkOut(user.id);
 
-        console.log(response);
-    };
 
     const isFromStepTwo = () => {
         return fromStepTwoUserContext;
@@ -212,7 +207,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                 userIsLoggedIn,
                 updateUserDetails,
                 saveUserDetails,
-                getUserWorkoutProgram,
+
                 isFromStepTwo,
                 setFromStepTwo
             }}>
@@ -221,10 +216,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
-export const getUserContext = () => {
+export const useUser = () => {
     const context = useContext(UserContext);
     if (!!!context) {
-        throw new Error("getUserContext must be used within a UserProvider");
+        throw new Error("useUser must be used within a UserProvider");
     }
     return context;
 };
+
+// Alias for backward compatibility if needed, or we can just replace usages.
+export const getUserContext = useUser;
