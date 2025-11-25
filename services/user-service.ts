@@ -1,7 +1,7 @@
 import { IUser } from "@/context/user-context";
 import Cookies from "js-cookie";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const userService = {
     updateUserDetails: async (userId: string, field: keyof IUser, value: any) => {

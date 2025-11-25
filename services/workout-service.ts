@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 import { WorkoutResponse, CreateWorkoutResponse, JobStatusResponse } from '@/types/workout';
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const workoutService = {
     getUserWorkOut: async (userID: string) => {
