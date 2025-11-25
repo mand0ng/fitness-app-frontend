@@ -131,7 +131,7 @@ const MyCalendar = ({ workoutData }: MyCalendarProps) => {
                                         <div className="space-y-2">
                                             {selectedDay.workout.warm_up.map((exercise, idx) => (
                                                 <div key={idx} className="flex justify-between text-sm">
-                                                    <span>• {exercise.name}</span>
+                                                    <span>• <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.name)}`} target="_blank" rel="noopener noreferrer" className="hover:underline">{exercise.name}</a></span>
                                                     <span className="text-muted-foreground">{exercise.duration}</span>
                                                 </div>
                                             ))}
@@ -145,7 +145,11 @@ const MyCalendar = ({ workoutData }: MyCalendarProps) => {
                                             {selectedDay.workout.exercises.map((exercise, idx) => (
                                                 <div key={idx} className="bg-(--card-background) p-3 rounded-md border border-(--muted)">
                                                     <div className="flex justify-between items-start mb-1">
-                                                        <p className="font-medium">{exercise.name}</p>
+                                                        <p className="font-medium">
+                                                            <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.name)}`} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                                                {exercise.name}
+                                                            </a>
+                                                        </p>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                                                         <p>{exercise.sets} sets × {exercise.reps}</p>
@@ -168,7 +172,7 @@ const MyCalendar = ({ workoutData }: MyCalendarProps) => {
                                         <div className="space-y-2">
                                             {selectedDay.workout.cooldown.map((exercise, idx) => (
                                                 <div key={idx} className="flex justify-between text-sm">
-                                                    <span>• {exercise.name}</span>
+                                                    <span>• <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.name)}`} target="_blank" rel="noopener noreferrer" className="hover:underline">{exercise.name}</a></span>
                                                     <span className="text-muted-foreground">{exercise.duration}</span>
                                                 </div>
                                             ))}
