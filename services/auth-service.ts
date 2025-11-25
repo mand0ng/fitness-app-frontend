@@ -7,7 +7,7 @@ export const authService = {
     login: async (candidate: ILoginCandidate) => {
         if (!API_URL) throw new Error('API_URL is not defined');
 
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const response = await fetch(`${API_URL}/auth/login/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(candidate),
@@ -23,7 +23,7 @@ export const authService = {
     createUser: async (user: ICandidate) => {
         if (!API_URL) throw new Error('API_URL is not defined');
 
-        const response = await fetch(`${API_URL}/create-user`, {
+        const response = await fetch(`${API_URL}/create-user/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(user),
@@ -38,7 +38,7 @@ export const authService = {
 
     checkToken: async (token: string) => {
         if (!API_URL) throw new Error('API_URL is not defined');
-        const response = await fetch(`${API_URL}/auth/check-token`, {
+        const response = await fetch(`${API_URL}/auth/check-token/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
