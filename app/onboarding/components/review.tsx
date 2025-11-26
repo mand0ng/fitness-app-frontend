@@ -11,11 +11,11 @@ const Review = ({ userDetails, gotoStep, onReviewSubmit }: ReviewProps) => {
 
     return (
         <div className="flex flex-col items-center justify-items-center ">
-            <h1 className="text-2xl font-bold text-center mb-3">
+            <h1 className="text-lg md:text-2xl font-bold text-center mb-3">
                 Please Review Your Details
             </h1>
             <div className="flex flex-col gap-2 w-full">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 text-sm md:text-base">
                     <div className="flex flex-col justify-between border border-(--muted) rounded-md p-2">
                         <p>Age: </p>
                         <p className="px-6 font-bold">{userDetails?.age}</p>
@@ -32,42 +32,42 @@ const Review = ({ userDetails, gotoStep, onReviewSubmit }: ReviewProps) => {
                         <p>Height: </p>
                         <p className="px-6 font-bold">{userDetails?.height}</p>
                     </div>
-                    <div className="flex flex-col justify-between border border-(--muted) rounded-md p-2">
+                    <div className="col-span-2 md:col-span-1 flex flex-col justify-between border border-(--muted) rounded-md p-2">
                         <p>Fitness Level: </p>
                         <p className="px-6 font-bold">{capitalizeFirstLetter(userDetails?.fitnessLevel || '')}</p>
                     </div>
-                    <div className="flex flex-col justify-between border border-(--muted) rounded-md p-2">
+                    <div className="col-span-2 md:col-span-1 flex flex-col justify-between border border-(--muted) rounded-md p-2">
                         <p>Fitness Goal:</p>
                         <p className="px-6 font-bold">{replaceUnderScoreWithSpace(capitalizeFirstLetter(userDetails?.fitnessGoal || ''))}</p>
                     </div>
                 </div>
-                <div className='flex flex-col justify-between border border-(--muted) rounded-md p-2'>
+                <div className='text-sm md:text-base flex flex-col justify-between border border-(--muted) rounded-md p-2'>
                     <p>Days Availability:</p>
-                    <div className="grid grid-cols-3 gap-2 px-6 font-bold">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 px-6 font-bold">
                         {(capitalizeFirstLetterArray(userDetails?.daysAvailability?.map((day) => day) || [])).map((day) => (
                             <div key={day}>{`- ${day}`}</div>
                         ))}
                     </div>
                 </div>
-                <div className="flex flex-col justify-between border border-(--muted) rounded-md p-2">
+                <div className="text-sm md:text-base flex flex-col justify-between border border-(--muted) rounded-md p-2">
                     <p>Equipment Availability:</p>
-                    <div className="grid grid-cols-3 gap-2 px-6 font-bold">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 px-6 font-bold">
                         {(capitalizeFirstLetterArray(userDetails?.equipmentAvailability || []
                             .map((equipment) => equipment)
                         )).map((equipment) => (
                             <div key={equipment}>{`- ${replaceUnderScoreWithSpace(equipment)}`}</div>
                         ))}</div>
                 </div>
-                <div className="flex flex-col justify-between border border-(--muted) rounded-md p-2">
+                <div className="text-sm md:text-base flex flex-col justify-between border border-(--muted) rounded-md p-2">
                     <p>Notes:</p>
-                    <p className="font-bold">{userDetails?.notes}</p>
+                    <p className="font-bold px-1">{userDetails?.notes}</p>
                 </div>
 
-                <div className="flex gap-6">
-                    <button onClick={() => gotoStep(1)} className="mt-8 w-full bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-md transition-colors">
+                <div className="flex flex-col md:flex-row md:gap-6">
+                    <button onClick={() => gotoStep(1)} className="mt-8 w-full bg-gray-500 hover:bg-gray-600 text-white py-2 md:py-3 rounded-md transition-colors">
                         Edit
                     </button>
-                    <button onClick={() => onReviewSubmit()} className="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-md transition-colors">
+                    <button onClick={() => onReviewSubmit()} className="mt-2 md:mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 md:py-3 rounded-md transition-colors">
                         Proceed
                     </button>
                 </div>

@@ -70,7 +70,7 @@ const StepThree = ({ gotoStep, updateUserDetails, userDetails }: StepThreeProps)
 
             {review && (
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-                    <div className="bg-(--card-background) p-6 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                    <div className="mx-10 bg-(--card-background) p-6 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
                         <Review userDetails={userDetails ? { ...userDetails, notes } : null} gotoStep={gotoStep} onReviewSubmit={onReviewSubmit} />
                         <button
                             onClick={() => setReview(false)}

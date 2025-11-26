@@ -54,12 +54,12 @@ const LoginPage = () => {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex items-center justify-center min-h-screen bg-background px-10">
             <form
                 onSubmit={handleSubmit}
                 className="bg-(--card-background) p-8 rounded-lg shadow-lg w-full max-w-sm flex flex-col gap-4"
             >
-                <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
+                <h1 className="text-xl md:text-2xl font-bold mb-4 text-center">Login</h1>
                 {error && (
                     <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-2 text-center">
                         {error}

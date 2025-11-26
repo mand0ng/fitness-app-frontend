@@ -1,3 +1,5 @@
+import { ArrowLeft, ArrowRight } from "@deemlol/next-icons"
+
 interface CustomToolbarProps {
     label: string;
     onNavigate: (action: 'PREV' | 'NEXT' | 'TODAY') => void;
@@ -24,13 +26,13 @@ const CustomCalendarToolbar = ({
     };
 
     return (
-        <div className="rbc-toolbar flex justify-center items-center py-2 mb-2 gap-4">
+        <div className="flex flex-row justify-center items-center py-2 mb-2 gap-4">
             <button
                 className={`px-2 py-1 rounded ${enableBack ? 'bg-gray-200 hover:bg-gray-300' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
                 onClick={handlePrev}
                 disabled={!enableBack}
             >
-                Back
+                <ArrowLeft size={12} />
             </button>
             <span className="text-xl font-bold">{label}</span>
             <button
@@ -38,7 +40,7 @@ const CustomCalendarToolbar = ({
                 onClick={handleNext}
                 disabled={!enableNext}
             >
-                Next
+                <ArrowRight size={12} />
             </button>
         </div>
     );

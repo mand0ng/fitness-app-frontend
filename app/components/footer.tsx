@@ -5,11 +5,11 @@ const Footer = () => {
     return (
         <section>
             <div className="my-footer inset-shadow-xs w-full flex flex-col p-10">
-                <div className="flex flex-row justify-around gap-10">
+                <div className="flex flex-col justify-around gap-10">
                     <div className="basis-1/3">
                         <div className="flex flex-col items-start justify-baseline  ">
                             <Logo size={25} textSize="text-l" />
-                            <p className="mt-3 text-sm w-2/3 sub-text">Your personal AI fitness coach, delivering tailored workout plans to help you achieve your goals.</p>
+                            <p className="mt-3 text-sm sub-text">Your personal AI fitness coach, delivering tailored workout plans to help you achieve your goals.</p>
                         </div>
                     </div>
                     <div className="flex flex-row justify-around gap-8 basis-2/3">

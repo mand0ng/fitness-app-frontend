@@ -166,7 +166,7 @@ const StepTwo = ({ gotoStep, updateUserDetails, userDetails }: StepTwoProps) => 
                             <span className="sub-text text-xs italic">(Select at least 3 days)</span>
                         </p>
 
-                        <div className="mt-2 grid grid-cols-4 gap-3 justify-center">
+                        <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-3 justify-center">
                             {daysOfWeek.map(day => (
                                 <label key={day} className="flex items-center gap-2">
                                     <input
@@ -195,7 +195,7 @@ const StepTwo = ({ gotoStep, updateUserDetails, userDetails }: StepTwoProps) => 
                             What equipment do you have access to?
                         </p>
 
-                        <div className="mt-2 grid grid-cols-3 gap-3 justify-center">
+                        <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-3 justify-center">
                             {equipmentOptions.map(option => (
                                 <label key={option.value} className="flex items-center gap-2">
                                     <input

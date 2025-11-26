@@ -101,7 +101,9 @@ const Dashboard = () => {
             console.log(jobResult);
 
             if (jobResult.job_status.status === 'failed') {
-                setError(jobResult.job_status.error || 'Workout generation failed');
+                // setError(jobResult.job_status.error || 'Workout generation failed');
+                console.log(jobResult.job_status.error);
+                setError("Failed to generate or load workout. Please try to refresh the page.")
                 setGeneratingWorkout(false);
                 setLoading(false);
                 return;
@@ -159,9 +161,9 @@ const Dashboard = () => {
     return (
         <section>
             <Header />
-            <section className="m-20">
-                <div className="border border-(--muted) rounded-lg shadow-lg p-10 my-secondary-bg mb-10">
-                    <h1 className="text-2xl font-bold mb-2">Welcome back {user?.name || 'Jane Doe'}!</h1>
+            <section className="m-5 md:m-20">
+                <div className="border border-(--muted) rounded-lg shadow-lg p-3 md:p-10 my-secondary-bg mb-10">
+                    <h1 className="text-xl md:text-2xl font-bold mb-2">Welcome back {user?.name || 'Jane Doe'}!</h1>
                 </div>
 
                 {user && <UserDetails user={user} />}

@@ -58,16 +58,16 @@ const MyCalendar = ({ workoutData }: MyCalendarProps) => {
     };
 
     return (
-        <div className='m-20'>
+        <div className=''>
             <div>
-                <h1 className="text-2xl font-bold mb-4 text-shadow-lg">Your Workout Calendar</h1>
+                <h1 className="text-xl md:text-2xl font-bold mb-2 text-shadow-lg">Your Workout Calendar</h1>
                 <p className='sub-text mb-6 text-sm'>
                     {workoutData ? 'Click on any day to view workout details!' : 'No workout plan yet.'}
                 </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left Column: Calendar */}
-                <div className="border border-(--muted) rounded-lg shadow-lg p-10 my-secondary-bg">
+                <div className="border border-(--muted) rounded-lg shadow-lg p-3 md:p-10 my-secondary-bg h-fit">
                     <Calendar
                         localizer={localizer}
                         events={events}
@@ -94,7 +94,7 @@ const MyCalendar = ({ workoutData }: MyCalendarProps) => {
                 </div>
 
                 {/* Right Column: Details Panel */}
-                <div className="border border-(--muted) rounded-lg p-6 my-secondary-bg h-full min-h-[500px]">
+                <div className="border border-(--muted) shadow-lg rounded-lg p-6 my-secondary-bg h-full min-h-[500px]">
                     {selectedDay ? (
                         // Selected Day View
                         <div className="h-full flex flex-col">
