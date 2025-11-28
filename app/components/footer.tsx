@@ -1,5 +1,6 @@
 import Logo from "./logo";
 import { Facebook, Twitter, Instagram } from "@deemlol/next-icons";
+import Link from "next/link";
 
 const Footer = () => {
     return (
@@ -25,7 +26,7 @@ const Footer = () => {
                         </div>
                         <div className="flex flex-col gap-3">
                             <h1 className="text-base font-bold">Legal</h1>
-                            <p className="text-sm sub-text">Privacy Policy</p>
+                            <Link href="/privacy-policy" className="text-sm sub-text hover:underline">Privacy Policy</Link>
                             <p className="text-sm sub-text">Terms of Service</p>
                         </div>
                     </div>

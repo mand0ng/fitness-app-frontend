@@ -94,7 +94,7 @@ const Dashboard = () => {
                 (data) => {
                     console.log("job status", data);
                     if (data.job_status.status === 'processing') {
-                        setGenerationProgress('Still generating... Please wait.');
+                        setGenerationProgress('Still generating. Please wait...');
                     }
                 }
             );
@@ -151,7 +151,7 @@ const Dashboard = () => {
                         }}
                         className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
                     >
-                        Try Again
+                        Refresh Page
                     </button>
                 </div>
             </div>

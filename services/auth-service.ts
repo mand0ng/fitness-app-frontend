@@ -20,6 +20,28 @@ export const authService = {
         return data;
     },
 
+    googleLogin: async (firebaseToken: string) => {
+        const response = await fetch(`${API_URL}/auth/social-login/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: firebaseToken }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Google login failed.');
+        return data;
+    },
+
+    facebookLogin: async (firebaseToken: string) => {
+        const response = await fetch(`${API_URL}/auth/social-login/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: firebaseToken }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Facebook login failed.');
+        return data;
+    },
+
     createUser: async (user: ICandidate) => {
         if (!API_URL) throw new Error('API_URL is not defined');
 

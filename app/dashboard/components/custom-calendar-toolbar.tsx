@@ -32,7 +32,7 @@ const CustomCalendarToolbar = ({
                 onClick={handlePrev}
                 disabled={!enableBack}
             >
-                <ArrowLeft size={12} />
+                <ArrowLeft size={12} className="text-gray-600" />
             </button>
             <span className="text-xl font-bold">{label}</span>
             <button
@@ -40,7 +40,7 @@ const CustomCalendarToolbar = ({
                 onClick={handleNext}
                 disabled={!enableNext}
             >
-                <ArrowRight size={12} />
+                <ArrowRight size={12} className="text-gray-600" />
             </button>
         </div>
     );

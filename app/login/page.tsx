@@ -6,6 +6,8 @@ import { authService } from "@/services/auth-service";
 import { getUserContext } from "@/context/user-context";
 import { isUserDoneOnboarding } from "@/utils/utils";
 import Loading from "../components/loading";
+import GoogleLoginButton from "../components/auth/google-login-button";
+import FacebookLoginButton from "../components/auth/facebook-login-button";
 
 const LoginPage = () => {
     const [email, setEmail] = useState("");
@@ -87,6 +89,15 @@ const LoginPage = () => {
                 >
                     Login
                 </button>
+
+                <div className="flex items-center gap-2 my-2">
+                    <div className="h-[1px] bg-gray-300 flex-1"></div>
+                    <span className="text-sm text-gray-500">OR</span>
+                    <div className="h-[1px] bg-gray-300 flex-1"></div>
+                </div>
+
+                <GoogleLoginButton />
+                <FacebookLoginButton />
             </form>
         </div>
     );

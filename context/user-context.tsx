@@ -5,6 +5,8 @@ import { authService } from "@/services/auth-service";
 import Cookies from 'js-cookie';
 import { userService } from "@/services/user-service";
 import { workoutService } from "@/services/workout-service";
+import { auth, googleProvider, facebookProvider } from "@/lib/firebase";
+import { signInWithPopup } from "firebase/auth";
 
 export interface ICandidate {
     email: string;
@@ -39,6 +41,8 @@ export interface IUserContextType {
     user: IUser | null;
     isFetchingUser: boolean;
     login: (userData: ILoginCandidate) => Promise<void>;
+    googleLogin: () => Promise<void>;
+    facebookLogin: () => Promise<void>;
     logout: () => void;
     signup: (userData: ICandidate) => Promise<void>;
     removeToken: () => void;
@@ -118,6 +122,52 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
         if (response.status === "error") {
             throw new Error(response.message);
+        }
+        if (response.status === "error") {
+            throw new Error(response.message);
+        }
+    };
+
+    const googleLogin = async () => {
+        try {
+            const result = await signInWithPopup(auth, googleProvider);
+            const token = await result.user.getIdToken();
+
+            console.log("Google ID Token:", token);
+
+            // Send token to backend
+            const response = await authService.googleLogin(token);
+
+            // Handle response
+            if (response.status === "success") {
+                setUser(response.user);
+                Cookies.set('user_token', response.access_token, { expires: 1 });
+            }
+        } catch (error: any) {
+            console.error("Google Login Error:", error);
+            if (error.code === 'auth/account-exists-with-different-credential') {
+                throw new Error("An account already exists with the same email address but different sign-in credentials. Please sign in using the provider associated with this email address.");
+            }
+            throw error;
+        }
+    };
+
+    const facebookLogin = async () => {
+        try {
+            const result = await signInWithPopup(auth, facebookProvider);
+            const token = await result.user.getIdToken();
+            console.log("Facebook ID Token:", token);
+            const response = await authService.facebookLogin(token);
+            if (response.status === "success") {
+                setUser(response.user);
+                Cookies.set('user_token', response.access_token, { expires: 1 });
+            }
+        } catch (error: any) {
+            console.error("Facebook Login Error:", error);
+            if (error.code === 'auth/account-exists-with-different-credential') {
+                throw new Error("An account already exists with the same email address but different sign-in credentials. Please sign in using the provider associated with this email address.");
+            }
+            throw error;
         }
     };
 
@@ -200,6 +250,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                 user,
                 isFetchingUser,
                 login,
+                googleLogin,
+                facebookLogin,
                 logout,
                 signup,
                 removeToken,

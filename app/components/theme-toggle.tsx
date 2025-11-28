@@ -15,7 +15,7 @@ export default function ThemeToggle() {
     return (
         <div className="flex items-center justify-center">
             <button
-                className="focus:outline-none"
+                className="focus:outline-none hover:scale-110 hover:opacity-80 transition-transform duration-300 ease-in-out"
                 onClick={
                     () => {
                         setTheme((prev) => (prev === "dark" ? "light" : "dark"))

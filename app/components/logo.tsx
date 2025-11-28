@@ -1,7 +1,9 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { getUserContext } from "@/context/user-context";
 
 interface LogoProps {
     size?: number;
@@ -10,14 +12,17 @@ interface LogoProps {
 
 const Logo = ({ size = 48, textSize = "text-2xl" }: LogoProps) => {
     const { resolvedTheme } = useTheme();
+    const { user } = getUserContext();
     const [logoSrc, setLogoSrc] = useState("/logo/white-header.png");
 
     useEffect(() => {
         setLogoSrc(resolvedTheme == "dark" ? "/logo/white-header.png" : "/logo/black-header.png");
     }, [resolvedTheme]);
 
+    const href = user ? "/dashboard" : "/";
+
     return (
-        <div className="flex items-center">
+        <Link href={href} className="flex items-center hover:scale-105 hover:opacity-80 transition-all duration-300 ease-in-out cursor-pointer">
             <Image
                 src={logoSrc}
                 alt="Get-Fit Logo"
@@ -27,7 +32,7 @@ const Logo = ({ size = 48, textSize = "text-2xl" }: LogoProps) => {
                 style={{ borderRadius: '4px' }}
             />
             <h1 className={`${textSize} font-bold text-shadow-md`}>Get-Fit</h1>
-        </div>
+        </Link>
     );
 }
 export default Logo;
