@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Heart } from "@deemlol/next-icons";
+import { Suspense } from "react";
 
-export default function PaymentSuccess() {
+function PaymentSuccessContent() {
     const searchParams = useSearchParams();
     const amount = searchParams.get("amount");
 
@@ -30,5 +31,13 @@ export default function PaymentSuccess() {
                 Go to Home
             </Link>
         </main>
+    );
+}
+
+export default function PaymentSuccess() {
+    return (
+        <Suspense fallback={<div className="max-w-6xl mx-auto p-10 text-center text-white">Loading...</div>}>
+            <PaymentSuccessContent />
+        </Suspense>
     );
 }
